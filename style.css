@@ -1,0 +1,184 @@
+/* ==========================================
+   기본 스타일 초기화 및 전체 웹페이지 레이아웃
+========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  line-height: 1.6;
+  color: #333333; /* 본문 글자 색상 */
+  background-color: #f8f9fa; /* 전체 배경색 */
+  padding: 20px;
+}
+
+/* ==========================================
+   헤더 및 네비게이션 (시각적 구분 & 고정)
+========================================== */
+header {
+  background-color: #ffffff;
+  padding: 15px 20px;
+  border-bottom: 2px solid #e9ecef; /* 테두리 */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #495057;
+  font-weight: bold;
+  font-size: 1rem; /* 글자 크기 */
+  transition: color 0.2s;
+}
+
+nav a:hover {
+  color: #2b6cb0; /* 호버 시 색상 변환 */
+}
+
+/* ==========================================
+   메인 컨텐츠 레이아웃
+========================================== */
+main {
+  max-width: 900px;
+  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px; /* 영역 간 여백 */
+}
+
+/* 영역(Section) 공통 카드 스타일 */
+section {
+  background-color: #ffffff; /* 영역 배경색 */
+  padding: 30px; /* 내부 여백 */
+  border-radius: 10px; /* 테두리 둥글게 */
+  border: 1px solid #e2e8f0; /* 테두리 속성 */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* 카드 그림자 효과 */
+}
+
+/* 제목 스타일 구분 */
+h1 {
+  font-size: 2.2rem; /* 큰 글자 크기 */
+  color: #1a365d; /* 짙은 푸른색 */
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 1.6rem;
+  color: #2b6cb0;
+  border-bottom: 2px solid #ebf8ff; /* 제목 아래 하이라이트 테두리 */
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 1.2rem;
+  color: #2d3748;
+  margin-bottom: 8px;
+}
+
+/* 본문 텍스트 여백 */
+p {
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+/* ==========================================
+   각 세션별 상세 스타일
+========================================== */
+/* 히어로 섹션 */
+#hero {
+  text-align: center;
+  background-color: #ebf8ff; /* 강조 배경색 */
+  border: 1px solid #bee3f8;
+}
+
+/* 서비스 소개 및 이미지 */
+#about img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid #cbd5e0;
+}
+
+/* 주요 기능 (3개 카드로 구분) */
+#features {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#features article {
+  background-color: #f7fafc;
+  padding: 20px;
+  border-left: 4px solid #3182ce; /* 좌측 강조 테두리 */
+  border-radius: 4px;
+}
+
+/* 이용 방법 단계별 리스트 */
+#how-to-use ol {
+  padding-left: 20px;
+}
+
+#how-to-use li {
+  margin-bottom: 15px;
+  padding-left: 10px;
+}
+
+/* 입력 폼 및 문의 영역 */
+.form-box {
+  background-color: #f7fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-top: 15px;
+}
+
+input[type="email"], textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+button {
+  background-color: #3182ce;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #2b6cb0;
+}
+
+/* ==========================================
+   푸터
+========================================== */
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #718096;
+  font-size: 0.9rem;
+  margin-top: 40px;
+}

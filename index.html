@@ -4,23 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DevBridge - 개발자와 프로젝트를 잇는 가장 빠른 길</title>
+  <!-- CSS 파일 연결 -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-
+  <!-- 8. 페이지 내부 이동 구조 (네비게이션 Header) -->
   <header>
-<nav>
+    <nav>
       <ul>
         <li><a href="#about">서비스 소개</a></li>
         <li><a href="#features">주요 기능</a></li>
         <li><a href="#how-to-use">이용 방법</a></li>
-        <li><a href="#contact">사전 신청</a></li>
+        <li><a href="#contact">사전 신청 및 문의</a></li>
       </ul>
     </nav>
-
   </header>
-
-  <hr>
 
   <main>
     <!-- 2. 서비스 이름과 한 줄 소개 (Hero Section) -->
@@ -32,7 +31,7 @@
     <!-- 3. 서비스 소개 & 6. 이미지 1장과 대체 텍스트 -->
     <section id="about">
       <h2>서비스 소개</h2>
-      <img src="assets/images/devbridge image.jpg" alt="팀원들이 노트북을 함께 보며 사이드 프로젝트 회의를 진행하고 있는 모습">
+      <img src="assets/images/devbridge image.jpg" alt="DevBridge 대시보드를 화면에 띄우고 팀원 매칭과 프로젝트 기회를 논의하고 있는 개발팀의 모습">
       <p>
         <strong>DevBridge</strong>는 혼자서 사이드 프로젝트를 시작하기 막막했던 분들을 위한 공간입니다.<br>
         자신의 기술 스택과 관심사에 꼭 맞는 동료를 찾고, 효율적인 협업 도구를 통해 성공적으로 프로젝트를 완성해보세요.
@@ -75,24 +74,45 @@
       </ol>
     </section>
 
-    <!-- 7. 최소 입력 영역 -->
+    <!-- 7. 최소 입력 영역 & 이메일 문의 -->
     <section id="contact">
-      <h2>DevBridge 사전 알림 신청하기</h2>
-      <p>정식 출시 소식과 함께 가장 먼저 팀원 추천 혜택을 받아보세요!</p>
-      <form action="#" method="post">
-        <label for="user-email">이메일 주소:</label>
-        <input type="email" id="user-email" name="email" placeholder="dev@example.com" required>
-        <button type="submit">사전 신청하기</button>
-      </form>
+      <h2>지금 바로 참여하세요</h2>
+      
+      <!-- 사전 신청 폼 -->
+      <div class="form-box">
+        <h3>사전 알림 신청하기</h3>
+        <p>정식 출시 소식과 함께 가장 먼저 팀원 추천 혜택을 받아보세요!</p>
+        <form action="#" method="post">
+          <label for="user-email">이메일 주소:</label>
+          <input type="email" id="user-email" name="email" placeholder="dev@example.com" required>
+          <button type="submit">사전 신청하기</button>
+        </form>
+      </div>
+
+      <!-- 이메일 문의 영역 -->
+      <div class="form-box">
+        <h3>이메일로 문의하기</h3>
+        <p>서비스 제휴 및 기타 궁금한 점이 있으시면 언제든지 문의해 주세요.</p>
+        <p>
+          공식 이메일: <a href="mailto:contact@devbridge.com">contact@devbridge.com</a>
+        </p>
+        
+        <form action="mailto:contact@devbridge.com" method="post" enctype="text/plain">
+          <label for="contact-email">보내시는 분 이메일:</label>
+          <input type="email" id="contact-email" name="sender_email" placeholder="your-email@example.com" required>
+          
+          <label for="contact-message">문의 내용:</label>
+          <textarea id="contact-message" name="message" rows="4" placeholder="문의하실 내용을 입력해주세요." required></textarea>
+          
+          <button type="submit">이메일 문의 보내기</button>
+        </form>
+      </div>
     </section>
   </main>
-
-  <hr>
 
   <!-- 푸터 영역 및 과제 제출 주소 메모 -->
   <footer>
     <p>&copy; 2026 DevBridge. All rights reserved.</p>
-
     <!-- 
       [과제 제출 주소 작성 안내]
       1. GitHub Repository URL: https://github.com/사용자이름/저장소이름
