@@ -1,5 +1,5 @@
 /* ==========================================
-   기본 스타일 초기화 및 전체 웹페이지 레이아웃
+   1. 기본 스타일 초기화 및 유동 너비 설정
 ========================================== */
 * {
   box-sizing: border-box;
@@ -10,131 +10,141 @@
 body {
   font-family: 'Noto Sans KR', sans-serif;
   line-height: 1.6;
-  color: #333333; /* 본문 글자 색상 */
-  background-color: #f8f9fa; /* 전체 배경색 */
-  padding: 20px;
+  color: #333333;
+  background-color: #f8f9fa;
+  padding: 20px 15px; /* 모바일 여백 대응 */
+  /* 가로 스크롤 방지 */
+  overflow-x: hidden; 
 }
 
 /* ==========================================
-   헤더 및 네비게이션 (시각적 구분 & 고정)
+   2. 유동 너비(Width/Max-width) 레이아웃 & 네비게이션
 ========================================== */
 header {
   background-color: #ffffff;
   padding: 15px 20px;
-  border-bottom: 2px solid #e9ecef; /* 테두리 */
+  border-bottom: 2px solid #e9ecef;
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
 }
 
 nav ul {
   list-style: none;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 20px;
+  flex-wrap: wrap; /* 메인 화면에서 자연스러운 넘침 방지 */
 }
 
 nav a {
   text-decoration: none;
   color: #495057;
   font-weight: bold;
-  font-size: 1rem; /* 글자 크기 */
+  font-size: 1rem;
   transition: color 0.2s;
 }
 
 nav a:hover {
-  color: #2b6cb0; /* 호버 시 색상 변환 */
+  color: #2b6cb0;
 }
 
-/* ==========================================
-   메인 컨텐츠 레이아웃
-========================================== */
+/* 콘텐츠 영역 반응형 너비 적용 */
 main {
-  max-width: 900px;
+  width: 100%;
+  max-width: 900px; /* 데스크톱 최대 너비 제한 */
   margin: 30px auto;
   display: flex;
   flex-direction: column;
-  gap: 40px; /* 영역 간 여백 */
+  gap: 30px;
 }
 
 /* 영역(Section) 공통 카드 스타일 */
 section {
-  background-color: #ffffff; /* 영역 배경색 */
-  padding: 30px; /* 내부 여백 */
-  border-radius: 10px; /* 테두리 둥글게 */
-  border: 1px solid #e2e8f0; /* 테두리 속성 */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* 카드 그림자 효과 */
+  background-color: #ffffff;
+  padding: 30px 25px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  width: 100%; /* 부모 너비에 맞춤 */
 }
 
-/* 제목 스타일 구분 */
+/* 이미지 유동 너비 적용 (잘림/가로 스크롤 방지) */
+#about img {
+  width: 100%;
+  max-width: 100%;
+  height: auto; /* 비율 유지 */
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid #cbd5e0;
+  display: block;
+}
+
+/* 제목 및 텍스트 반응형 */
 h1 {
-  font-size: 2.2rem; /* 큰 글자 크기 */
-  color: #1a365d; /* 짙은 푸른색 */
+  font-size: 2.2rem;
+  color: #1a365d;
   margin-bottom: 10px;
   text-align: center;
+  word-break: keep-all; /* 단어 단위 줄바꿈 */
 }
 
 h2 {
   font-size: 1.6rem;
   color: #2b6cb0;
-  border-bottom: 2px solid #ebf8ff; /* 제목 아래 하이라이트 테두리 */
+  border-bottom: 2px solid #ebf8ff;
   padding-bottom: 10px;
   margin-bottom: 20px;
+  word-break: keep-all;
 }
 
 h3 {
   font-size: 1.2rem;
   color: #2d3748;
   margin-bottom: 8px;
+  word-break: keep-all;
 }
 
-/* 본문 텍스트 여백 */
 p {
   margin-bottom: 12px;
   font-size: 1rem;
+  word-break: keep-all;
 }
 
-/* ==========================================
-   각 세션별 상세 스타일
-========================================== */
 /* 히어로 섹션 */
 #hero {
   text-align: center;
-  background-color: #ebf8ff; /* 강조 배경색 */
+  background-color: #ebf8ff;
   border: 1px solid #bee3f8;
 }
 
-/* 서비스 소개 및 이미지 */
-#about img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin: 15px 0;
-  border: 1px solid #cbd5e0;
-}
-
-/* 주요 기능 (3개 카드로 구분) */
-#features {
-  display: flex;
-  flex-direction: column;
+/* ==========================================
+   3. 기능 카드의 CSS Grid 구성 (기본 3열 배치)
+========================================== */
+#features .grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 데스크톱/태블릿 3열 */
   gap: 20px;
+  margin-top: 15px;
 }
 
 #features article {
   background-color: #f7fafc;
   padding: 20px;
-  border-left: 4px solid #3182ce; /* 좌측 강조 테두리 */
+  border-left: 4px solid #3182ce;
   border-radius: 4px;
 }
 
-/* 이용 방법 단계별 리스트 */
+/* 이용 방법 리스트 */
 #how-to-use ol {
   padding-left: 20px;
 }
 
 #how-to-use li {
   margin-bottom: 15px;
-  padding-left: 10px;
+  padding-left: 5px;
 }
 
 /* 입력 폼 및 문의 영역 */
@@ -144,11 +154,19 @@ p {
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   margin-top: 15px;
+  width: 100%;
+}
+
+.form-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
 }
 
 input[type="email"], textarea {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin-top: 6px;
   margin-bottom: 12px;
   border: 1px solid #cbd5e0;
@@ -160,25 +178,91 @@ button {
   background-color: #3182ce;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 12px 20px;
   font-size: 1rem;
   font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 button:hover {
   background-color: #2b6cb0;
 }
 
-/* ==========================================
-   푸터
-========================================== */
 footer {
   text-align: center;
   padding: 20px;
   color: #718096;
   font-size: 0.9rem;
-  margin-top: 40px;
+  margin-top: 30px;
+}
+
+/* ==========================================
+   4. @media (max-width: 768px) 모바일/태블릿 반응형
+========================================== */
+@media (max-width: 768px) {
+  body {
+    padding: 10px 10px;
+  }
+
+  /* (1) 내비게이션 세로 배치 */
+  nav ul {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  nav li {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* (2) 기능 카드를 1열로 배치 */
+  #features .grid-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  /* (3) 이메일 입력창과 버튼 세로 배치 */
+  .form-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-group input[type="email"] {
+    margin-bottom: 8px;
+  }
+
+  .form-group button,
+  form button {
+    width: 100%; /* 버튼 가로 가득 채우기 */
+  }
+
+  /* (4) 모바일 화면에 맞게 글자 크기와 여백 조정 */
+  section {
+    padding: 20px 15px; /* 내부 여백 축소 */
+  }
+
+  h1 {
+    font-size: 1.75rem; /* 글자 크기 축소 */
+  }
+
+  h2 {
+    font-size: 1.35rem;
+    margin-bottom: 15px;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  p, li {
+    font-size: 0.95rem; /* 읽기 편하도록 본문 폰트 조정 */
+  }
+
+  main {
+    margin: 15px auto;
+    gap: 20px;
+  }
 }
