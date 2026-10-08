@@ -258,3 +258,34 @@ footer {
     gap: 20px;
   }
 }
+/* 기존 style.css 맨 하단에 추가 */
+
+/* JS 결과 피드백 스타일 */
+.message {
+  margin-top: 12px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  display: none; /* 기본 상태 숨김 */
+}
+
+/* 에러 상태 문구 (빨간색) */
+.message.error {
+  display: block;
+  color: #e53e3e;
+}
+
+/* 성공 상태 문구 (초록색) */
+.message.success {
+  display: block;
+  color: #2f855a;
+}
+
+/* 신청 완료 후 비활성화된 버튼 스타일 */
+button.disabled-btn {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+button.disabled-btn:hover {
+  background-color: #a0aec0;
+}
