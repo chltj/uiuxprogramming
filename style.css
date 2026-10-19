@@ -423,11 +423,46 @@ select:focus, input[type="text"]:focus, input[type="email"]:focus {
   font-weight: bold;
 }
 
-.form-box {
-  background-color: #f7fafc;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+/* 문의 폼 및 textarea 전용 스타일 */
+.form-box label {
+  display: block;
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-top: 14px;
+  margin-bottom: 6px;
+  color: #2d3748;
+}
+
+.form-box input[type="email"],
+.form-box textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #2d3748;
+  background-color: #ffffff;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* 텍스트 영역 기본 높이 지정 및 자동 정돈 */
+.form-box textarea {
+  min-height: 150px;       /* 늘리지 않아도 처음부터 넉넉하고 예쁜 높이 */
+  line-height: 1.6;
+  resize: vertical;        /* 필요할 때만 아래로 조금 더 늘릴 수 있게 제한 */
+}
+
+.form-box input[type="email"]:focus,
+.form-box textarea:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+.form-box button {
+  margin-top: 6px;
 }
 
 footer {
