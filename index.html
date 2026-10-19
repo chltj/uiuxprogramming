@@ -13,6 +13,7 @@
       <ul>
         <li><a href="#about">서비스 소개</a></li>
         <li><a href="#features">주요 기능</a></li>
+        <li><a href="#explore">프로젝트 탐색</a></li>
         <li><a href="#how-to-use">이용 방법</a></li>
         <li><a href="#contact">사전 신청 및 문의</a></li>
       </ul>
@@ -52,6 +53,36 @@
       </div>
     </section>
 
+    <!-- [신규] 3단 탭 UI 섹션 (기술 스택별 프로젝트 탐색) -->
+    <section id="explore">
+      <h2>모집 중인 프로젝트 둘러보기</h2>
+      <p>관심 있는 기술 분야의 탭을 선택하여 현재 모집 중인 팀을 확인해보세요.</p>
+      
+      <div class="tab-menu">
+        <button type="button" class="tab-btn active" data-tab="tab-frontend">프론트엔드</button>
+        <button type="button" class="tab-btn" data-tab="tab-backend">백엔드</button>
+        <button type="button" class="tab-btn" data-tab="tab-ai">AI / 데이터</button>
+      </div>
+
+      <div class="tab-content-wrapper">
+        <div id="tab-frontend" class="tab-pane active">
+          <h3>🎨 프론트엔드 중심 사이드 프로젝트</h3>
+          <p><strong>추천 기술:</strong> React, Next.js, TypeScript, Tailwind CSS</p>
+          <p>현재 UI/UX 디자이너와 협업하여 반응형 웹 대시보드를 제작할 개발자 2명을 모집 중입니다.</p>
+        </div>
+        <div id="tab-backend" class="tab-pane">
+          <h3>⚙️ 백엔드 중심 분산 아키텍처 프로젝트</h3>
+          <p><strong>추천 기술:</strong> Java Spring Boot, MySQL, Redis, AWS</p>
+          <p>대용량 트래픽 처리를 경험할 모임 플랫폼 백엔드 팀원을 모집하고 있습니다.</p>
+        </div>
+        <div id="tab-ai" class="tab-pane">
+          <h3>🤖 AI 모델 파이프라인 & 데이터 분석</h3>
+          <p><strong>추천 기술:</strong> Python, FastAPI, PyTorch, LangChain</p>
+          <p>LLM API를 연동한 개발자 생산성 도구 프로토타입 제작 팀원을 구하고 있습니다.</p>
+        </div>
+      </div>
+    </section>
+
     <section id="how-to-use">
       <h2>이용 방법</h2>
       <ol>
@@ -73,17 +104,29 @@
     <section id="contact">
       <h2>지금 바로 참여하세요</h2>
       
-      <!-- JS가 연결되는 사전 알림 신청 폼 영역 -->
+      <!-- 사전 알림 신청 폼 (click, input, change 이벤트 적용) -->
       <div class="form-box">
-        <h3>사전 알림 신청하기</h3>
-        <p>정식 출시 소식과 함께 가장 먼저 팀원 추천 혜택을 받아보세요!</p>
+        <h3>사전 알림 맞춤 신청</h3>
+        <p>희망 직군을 선택하고 이메일을 입력하시면 맞춤 출시 알림을 보내드립니다.</p>
+        
         <form id="pre-order-form">
-          <label for="user-email">이메일 주소:</label>
+          <!-- change 이벤트 대상 -->
+          <label for="user-position"><strong>희망 참여 포지션 선택:</strong></label>
+          <select id="user-position" name="position">
+            <option value="">-- 포지션을 선택하세요 --</option>
+            <option value="frontend">프론트엔드 엔지니어</option>
+            <option value="backend">백엔드 엔지니어</option>
+            <option value="fullstack">풀스택 엔지니어</option>
+            <option value="ai">AI / ML 엔지니어</option>
+          </select>
+          <p id="position-feedback" class="position-info">포지션을 선택하면 우선 매칭 그룹이 지정됩니다.</p>
+
+          <!-- input & click 이벤트 대상 -->
+          <label for="user-email"><strong>이메일 주소:</strong></label>
           <div class="form-group">
             <input type="email" id="user-email" name="email" placeholder="dev@example.com" required>
-            <button type="submit" id="submit-btn">사전 신청하기</button>
+            <button type="submit" id="submit-btn" disabled>사전 신청하기</button>
           </div>
-          <!-- 안내 문구 표시 위치 -->
           <p id="form-message" class="message"></p>
         </form>
       </div>
@@ -94,7 +137,6 @@
         <p>
           공식 이메일: <a href="mailto:contact@devbridge.com">contact@devbridge.com</a>
         </p>
-        
         <form action="mailto:contact@devbridge.com" method="post" enctype="text/plain">
           <label for="contact-email">보내시는 분 이메일:</label>
           <input type="email" id="contact-email" name="sender_email" placeholder="your-email@example.com" required>
@@ -112,7 +154,6 @@
     <p>&copy; 2026 DevBridge. All rights reserved.</p>
   </footer>
 
-  <!-- script.js 연결 -->
   <script src="script.js"></script>
 </body>
 </html>
