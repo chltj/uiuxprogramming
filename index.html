@@ -15,7 +15,7 @@
         <li><a href="#features">주요 기능</a></li>
         <li><a href="#explore">프로젝트 탐색</a></li>
         <li><a href="#how-to-use">이용 방법</a></li>
-        <li><a href="#contact">사전 신청 및 문의</a></li>
+        <li><a href="#matching-flow">프로젝트 매칭 신청</a></li>
       </ul>
     </nav>
   </header>
@@ -53,7 +53,7 @@
       </div>
     </section>
 
-    <!-- [신규] 3단 탭 UI 섹션 (기술 스택별 프로젝트 탐색) -->
+    
     <section id="explore">
       <h2>모집 중인 프로젝트 둘러보기</h2>
       <p>관심 있는 기술 분야의 탭을 선택하여 현재 모집 중인 팀을 확인해보세요.</p>
@@ -87,65 +87,151 @@
       <h2>이용 방법</h2>
       <ol>
         <li>
-          <strong>1단계: 프로필 등록하기</strong>
-          <p>사용 중인 기술 스택과 관심 있는 프로젝트 분야를 프로필에 등록합니다.</p>
+          <strong>1단계: 프로필 및 관심 분야 선택</strong>
+          <p>자신의 포지션과 개발하고 싶은 서비스 카테고리를 선택합니다.</p>
         </li>
         <li>
-          <strong>2단계: 팀 찾기 또는 프로젝트 생성</strong>
-          <p>추천된 프로젝트에 지원하거나, 직접 팀원을 모집하는 글을 작성합니다.</p>
+          <strong>2단계: 연락처 및 정보 입력</strong>
+          <p>매칭 알림을 수신할 이름과 이메일 주소를 입력합니다.</p>
         </li>
         <li>
-          <strong>3단계: 매칭 완료 및 협업 시작</strong>
-          <p>매칭이 완료되면 팀 전용 대시보드에서 효율적으로 프로젝트를 진행합니다.</p>
+          <strong>3단계: 입력 정보 확인 및 최종 접수</strong>
+          <p>입력한 내용을 확인하고 필요 시 이전 단계로 돌아가 수정합니다.</p>
         </li>
       </ol>
     </section>
 
-    <section id="contact">
-      <h2>지금 바로 참여하세요</h2>
-      
-      <!-- 사전 알림 신청 폼 (click, input, change 이벤트 적용) -->
-      <div class="form-box">
-        <h3>사전 알림 맞춤 신청</h3>
-        <p>희망 직군을 선택하고 이메일을 입력하시면 맞춤 출시 알림을 보내드립니다.</p>
-        
-        <form id="pre-order-form">
-          <!-- change 이벤트 대상 -->
-          <label for="user-position"><strong>희망 참여 포지션 선택:</strong></label>
-          <select id="user-position" name="position">
-            <option value="">-- 포지션을 선택하세요 --</option>
-            <option value="frontend">프론트엔드 엔지니어</option>
-            <option value="backend">백엔드 엔지니어</option>
-            <option value="fullstack">풀스택 엔지니어</option>
-            <option value="ai">AI / ML 엔지니어</option>
-          </select>
-          <p id="position-feedback" class="position-info">포지션을 선택하면 우선 매칭 그룹이 지정됩니다.</p>
+   
+    <section id="matching-flow">
+      <h2>팀원 매칭 원스톱 신청</h2>
+      <p class="flow-desc">관심 프로젝트에 참여하기 위한 4단계 매칭 프로세스를 완료해 보세요.</p>
 
-          <!-- input & click 이벤트 대상 -->
-          <label for="user-email"><strong>이메일 주소:</strong></label>
-          <div class="form-group">
-            <input type="email" id="user-email" name="email" placeholder="dev@example.com" required>
-            <button type="submit" id="submit-btn" disabled>사전 신청하기</button>
-          </div>
-          <p id="form-message" class="message"></p>
-        </form>
+      
+      <div class="stepper" aria-label="진행 단계">
+        <div class="step-indicator active" data-step="1"><span>1</span><p>분야 선택</p></div>
+        <div class="step-line"></div>
+        <div class="step-indicator" data-step="2"><span>2</span><p>정보 입력</p></div>
+        <div class="step-line"></div>
+        <div class="step-indicator" data-step="3"><span>3</span><p>정보 확인</p></div>
+        <div class="step-line"></div>
+        <div class="step-indicator" data-step="4"><span>4</span><p>접수 완료</p></div>
       </div>
 
+     
+      <div class="wizard-container">
+        
+        
+        <div class="wizard-step active" id="step-1">
+          <h3>1단계: 참여 포지션 및 프로젝트 분야 선택</h3>
+          <p class="step-instruction">원하시는 직군과 프로젝트 주제를 선택해 주세요. (모두 필수 항목입니다)</p>
+          
+          <div class="input-block">
+            <label for="flow-position"><strong>희망 포지션 *</strong></label>
+            <select id="flow-position">
+              <option value="">-- 포지션을 선택하세요 --</option>
+              <option value="프론트엔드 엔지니어">프론트엔드 엔지니어</option>
+              <option value="백엔드 엔지니어">백엔드 엔지니어</option>
+              <option value="풀스택 엔지니어">풀스택 엔지니어</option>
+              <option value="AI / ML 엔지니어">AI / ML 엔지니어</option>
+            </select>
+          </div>
+
+          <div class="input-block">
+            <label for="flow-category"><strong>관심 프로젝트 분야 *</strong></label>
+            <select id="flow-category">
+              <option value="">-- 관심 분야를 선택하세요 --</option>
+              <option value="웹 플랫폼 / SaaS">웹 플랫폼 / SaaS</option>
+              <option value="모바일 커뮤니티">모바일 커뮤니티</option>
+              <option value="인공지능 도구 개발">인공지능 도구 개발</option>
+              <option value="이커머스 / 결제">이커머스 / 결제</option>
+            </select>
+          </div>
+
+          <p id="error-step-1" class="step-error" role="alert"></p>
+
+          <div class="step-actions right">
+            <button type="button" id="btn-to-step2" class="btn primary-btn">다음 단계로 (정보 입력)</button>
+          </div>
+        </div>
+
+    
+        <div class="wizard-step" id="step-2">
+          <h3>2단계: 신청자 기본 정보 입력</h3>
+          <p class="step-instruction">매칭 안내 및 팀 리더 연락을 위해 정확한 정보를 입력해 주세요.</p>
+
+          <div class="input-block">
+            <label for="flow-name"><strong>신청자 이름 / 닉네임 *</strong></label>
+            <input type="text" id="flow-name" placeholder="예: 김개발">
+          </div>
+
+          <div class="input-block">
+            <label for="flow-email"><strong>연락처 이메일 주소 *</strong></label>
+            <input type="email" id="flow-email" placeholder="dev@example.com">
+          </div>
+
+          <p id="error-step-2" class="step-error" role="alert"></p>
+
+          <div class="step-actions split">
+            <button type="button" id="btn-back-to-step1" class="btn secondary-btn">이전 단계</button>
+            <button type="button" id="btn-to-step3" class="btn primary-btn">다음 단계로 (내용 확인)</button>
+          </div>
+        </div>
+
+     
+        <div class="wizard-step" id="step-3">
+          <h3>3단계: 입력한 신청 정보 확인</h3>
+          <p class="step-instruction">입력하신 정보가 올바른지 확인해 주세요. 수정이 필요한 경우 이전 단계로 돌아갈 수 있습니다.</p>
+
+          <div class="summary-table">
+            <div class="summary-row">
+              <span class="summary-label">희망 포지션</span>
+              <span class="summary-value" id="summary-position">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">관심 프로젝트 분야</span>
+              <span class="summary-value" id="summary-category">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">신청자 이름</span>
+              <span class="summary-value" id="summary-name">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">이메일 주소</span>
+              <span class="summary-value" id="summary-email">-</span>
+            </div>
+          </div>
+
+          <div class="step-actions split">
+            <button type="button" id="btn-back-to-step2" class="btn secondary-btn">이전 단계로 수정하러 가기</button>
+            <button type="button" id="btn-submit-matching" class="btn success-btn">최종 매칭 신청하기</button>
+          </div>
+        </div>
+
+  
+        <div class="wizard-step" id="step-4">
+          <div class="completion-box">
+            <div class="completion-icon">✅</div>
+            <h3>매칭 신청이 정상 접수되었습니다!</h3>
+            <p class="completion-message">
+              <strong id="complete-name">신청자</strong>님의 매칭 신청서가 DevBridge 매칭 풀에 등록되었습니다.<br>
+              입력하신 <strong><span id="complete-email"></span></strong> 주소로 접수 확인서 및 추천 팀 매칭 링크를 발송해 드립니다.
+            </p>
+            <div class="receipt-card">
+              <p>접수 번호: <strong id="receipt-id">DB-2026-XXXX</strong></p>
+              <p>접수 상태: <span class="badge">검토 대기 중</span></p>
+            </div>
+            <button type="button" id="btn-restart-flow" class="btn secondary-btn">처음부터 다시 신청하기</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  
+    <section id="contact">
+      <h2>기타 서비스 문의</h2>
       <div class="form-box">
-        <h3>이메일로 문의하기</h3>
-        <p>서비스 제휴 및 기타 궁금한 점이 있으시면 언제든지 문의해 주세요.</p>
-        <p>
-          공식 이메일: <a href="mailto:contact@devbridge.com">contact@devbridge.com</a>
-        </p>
-        <form action="mailto:contact@devbridge.com" method="post" enctype="text/plain">
-          <label for="contact-email">보내시는 분 이메일:</label>
-          <input type="email" id="contact-email" name="sender_email" placeholder="your-email@example.com" required>
-          
-          <label for="contact-message">문의 내용:</label>
-          <textarea id="contact-message" name="message" rows="4" placeholder="문의하실 내용을 입력해주세요." required></textarea>
-          
-          <button type="submit">이메일 문의 보내기</button>
-        </form>
+        <p>서비스 제휴 및 건의 사항은 공식 이메일로 연락주세요: <a href="mailto:contact@devbridge.com">contact@devbridge.com</a></p>
       </div>
     </section>
   </main>

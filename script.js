@@ -1,100 +1,198 @@
 document.addEventListener('DOMContentLoaded', function () {
-  // ==========================================
-  // 1. 탭 UI 기능 구현 (click 이벤트)
-  // ==========================================
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabPanes = document.querySelectorAll('.tab-pane');
 
   tabButtons.forEach(function (button) {
     button.addEventListener('click', function () {
-      // 모든 탭 버튼 비활성화 및 클릭된 탭 활성화 (스타일 변경)
       tabButtons.forEach(btn => btn.classList.remove('active'));
       button.classList.add('active');
 
-      // 모든 콘텐츠 숨기기 및 선택된 탭 콘텐츠 표시 (문구/콘텐츠 변경)
       const targetTabId = button.getAttribute('data-tab');
       tabPanes.forEach(pane => {
-        if (pane.id === targetTabId) {
-          pane.classList.add('active');
-        } else {
-          pane.classList.remove('active');
-        }
+        pane.classList.toggle('active', pane.id === targetTabId);
       });
     });
   });
 
-  // ==========================================
-  // 2. 포지션 선택 상자 처리 (change 이벤트)
-  // ==========================================
-  const positionSelect = document.getElementById('user-position');
-  const positionFeedback = document.getElementById('position-feedback');
 
-  positionSelect.addEventListener('change', function () {
-    const selectedValue = positionSelect.value;
-    const selectedText = positionSelect.options[positionSelect.selectedIndex].text;
+  // 1. 상태(State) 데이터 모델
+  const flowState = {
+    currentStep: 1,
+    position: '',
+    category: '',
+    name: '',
+    email: ''
+  };
 
-    if (selectedValue === '') {
-      // 선택 해제 시 문구 및 스타일 초기화
-      positionFeedback.textContent = '포지션을 선택하면 우선 매칭 그룹이 지정됩니다.';
-      positionFeedback.classList.remove('selected');
-    } else {
-      // 선택 시 문구 변경 및 배경/글자 스타일 변경 (복합 피드백)
-      positionFeedback.textContent = `[우선 매칭 그룹 등록] ${selectedText} 분야의 프로젝트 오픈 시 1순위로 알림을 드립니다.`;
-      positionFeedback.classList.add('selected');
-    }
-  });
+  // DOM 요소 선택
+  const stepIndicators = document.querySelectorAll('.step-indicator');
+  const wizardSteps = document.querySelectorAll('.wizard-step');
 
-  // ==========================================
-  // 3. 실시간 이메일 검증 처리 (input 이벤트)
-  // ==========================================
-  const userEmailInput = document.getElementById('user-email');
-  const submitBtn = document.getElementById('submit-btn');
-  const formMessage = document.getElementById('form-message');
+  // Step 1 요소
+  const flowPosition = document.getElementById('flow-position');
+  const flowCategory = document.getElementById('flow-category');
+  const errorStep1 = document.getElementById('error-step-1');
+  const btnToStep2 = document.getElementById('btn-to-step2');
+
+  // Step 2 요소
+  const flowName = document.getElementById('flow-name');
+  const flowEmail = document.getElementById('flow-email');
+  const errorStep2 = document.getElementById('error-step-2');
+  const btnBackToStep1 = document.getElementById('btn-back-to-step1');
+  const btnToStep3 = document.getElementById('btn-to-step3');
+
+  // Step 3 요소 (확인)
+  const summaryPosition = document.getElementById('summary-position');
+  const summaryCategory = document.getElementById('summary-category');
+  const summaryName = document.getElementById('summary-name');
+  const summaryEmail = document.getElementById('summary-email');
+  const btnBackToStep2 = document.getElementById('btn-back-to-step2');
+  const btnSubmitMatching = document.getElementById('btn-submit-matching');
+
+  // Step 4 요소 (완료 및 재시작)
+  const completeName = document.getElementById('complete-name');
+  const completeEmail = document.getElementById('complete-email');
+  const receiptId = document.getElementById('receipt-id');
+  const btnRestartFlow = document.getElementById('btn-restart-flow');
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  userEmailInput.addEventListener('input', function () {
-    const emailVal = userEmailInput.value.trim();
+  // 단계 이동 및 화면 갱신 함수
+  function goToStep(targetStep) {
+    flowState.currentStep = targetStep;
 
-    if (emailVal === '') {
-      // 1) 빈 값: 메시지 숨김, 인풋 테두리 초기화, 버튼 비활성화
-      formMessage.style.display = 'none';
-      userEmailInput.classList.remove('is-valid', 'is-invalid');
-      submitBtn.disabled = true;
-    } else if (!emailRegex.test(emailVal)) {
-      // 2) 유효하지 않은 형식: 에러 문구 표시, 빨간 테두리 스타일, 버튼 비활성화
-      formMessage.textContent = '올바른 이메일 형식(@ 및 도메인 포함)을 입력해 주세요.';
-      formMessage.className = 'message error';
-      userEmailInput.classList.remove('is-valid');
-      userEmailInput.classList.add('is-invalid');
-      submitBtn.disabled = true;
-    } else {
-      // 3) 유효한 형식: 정상 안내 문구 표시, 초록 테두리 스타일, 버튼 활성화 (복합 피드백 동시 충족)
-      formMessage.textContent = '사용 가능한 이메일 형식입니다. 신청 버튼을 눌러주세요.';
-      formMessage.className = 'message success';
-      userEmailInput.classList.remove('is-invalid');
-      userEmailInput.classList.add('is-valid');
-      submitBtn.disabled = false; // 버튼 상태 변경
+    // 단계별 섹션 노출 토글
+    wizardSteps.forEach((step, idx) => {
+      step.classList.toggle('active', idx + 1 === targetStep);
+    });
+
+    // 상단 인디케이터 상태 갱신
+    stepIndicators.forEach((indicator, idx) => {
+      const stepNum = idx + 1;
+      indicator.classList.remove('active', 'completed');
+      if (stepNum === targetStep) {
+        indicator.classList.add('active');
+      } else if (stepNum < targetStep) {
+        indicator.classList.add('completed');
+      }
+    });
+
+    // 3단계(확인)에 진입 시 저장된 상태값을 확인 테이블에 주입
+    if (targetStep === 3) {
+      summaryPosition.textContent = flowState.position;
+      summaryCategory.textContent = flowState.category;
+      summaryName.textContent = flowState.name;
+      summaryEmail.textContent = flowState.email;
     }
+
+    // 모바일 등에서 단계 전환 시 폼 상단으로 부드럽게 스크롤
+    document.getElementById('matching-flow').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+ 
+  btnToStep2.addEventListener('click', function () {
+    const selectedPosition = flowPosition.value;
+    const selectedCategory = flowCategory.value;
+
+    // 조건 검증: 필수 선택 누락 여부 확인
+    if (!selectedPosition || !selectedCategory) {
+      errorStep1.textContent = '⚠️ 희망 포지션과 관심 프로젝트 분야를 모두 선택해 주세요.';
+      errorStep1.classList.add('show');
+      return;
+    }
+
+    // 통과 시 상태 저장 및 에러 초기화
+    errorStep1.classList.remove('show');
+    flowState.position = selectedPosition;
+    flowState.category = selectedCategory;
+
+    // 2단계로 진행
+    goToStep(2);
   });
 
-  // ==========================================
-  // 4. 폼 최종 제출 처리 (click / submit 이벤트)
-  // ==========================================
-  const preOrderForm = document.getElementById('pre-order-form');
+ 
+  btnBackToStep1.addEventListener('click', function () {
+    // 이전으로 돌아가도 Step 2에 입력한 텍스트 임시 저장
+    flowState.name = flowName.value.trim();
+    flowState.email = flowEmail.value.trim();
+    errorStep2.classList.remove('show');
 
-  preOrderForm.addEventListener('submit', function (event) {
-    event.preventDefault();
+    // 1단계 셀렉트 박스에 기존 상태 유지 확인
+    flowPosition.value = flowState.position;
+    flowCategory.value = flowState.category;
 
-    const emailVal = userEmailInput.value.trim();
-    const positionText = positionSelect.value ? positionSelect.options[positionSelect.selectedIndex].text : '일반 개발자';
+    goToStep(1);
+  });
 
-    // 최종 완료 피드백: 문구 변경 + 버튼 상태 비활성화 + 텍스트 변경
-    formMessage.textContent = `🎉 [${positionText}] ${emailVal}님, 사전 등록이 성공적으로 완료되었습니다!`;
-    formMessage.className = 'message success';
+--
+  btnToStep3.addEventListener('click', function () {
+    const inputName = flowName.value.trim();
+    const inputEmail = flowEmail.value.trim();
 
-    submitBtn.textContent = '신청 완료';
-    submitBtn.disabled = true;
-    userEmailInput.disabled = true;
-    positionSelect.disabled = true;
+
+    if (inputName === '') {
+      errorStep2.textContent = '⚠️ 신청자 이름을 입력해 주세요.';
+      errorStep2.classList.add('show');
+      flowName.focus();
+      return;
+    }
+
+    
+    if (!emailRegex.test(inputEmail)) {
+      errorStep2.textContent = '⚠️ 올바른 이메일 형식(예: dev@example.com)을 입력해 주세요.';
+      errorStep2.classList.add('show');
+      flowEmail.focus();
+      return;
+    }
+
+    errorStep2.classList.remove('show');
+    flowState.name = inputName;
+    flowState.email = inputEmail;
+
+    goToStep(3);
+  });
+
+  btnBackToStep2.addEventListener('click', function () {
+    // 2단계 인풋창에 기존 저장된 값 복원 유지
+    flowName.value = flowState.name;
+    flowEmail.value = flowState.email;
+    goToStep(2);
+  });
+
+
+  btnSubmitMatching.addEventListener('click', function () {
+    // 랜덤 접수 번호 생성 (DB-2026-XXXX)
+    const randomCode = Math.floor(1000 + Math.random() * 9000);
+    const generatedReceipt = `DB-2026-${randomCode}`;
+
+    // 완료 화면에 신청자 정보 바인딩
+    completeName.textContent = flowState.name;
+    completeEmail.textContent = flowState.email;
+    receiptId.textContent = generatedReceipt;
+
+    goToStep(4);
+  });
+
+
+  btnRestartFlow.addEventListener('click', function () {
+    // 1. 상태 모델 초기화
+    flowState.currentStep = 1;
+    flowState.position = '';
+    flowState.category = '';
+    flowState.name = '';
+    flowState.email = '';
+
+    
+    flowPosition.value = '';
+    flowCategory.value = '';
+    flowName.value = '';
+    flowEmail.value = '';
+
+   
+    errorStep1.classList.remove('show');
+    errorStep2.classList.remove('show');
+
+  
+    goToStep(1);
   });
 });

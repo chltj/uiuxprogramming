@@ -122,7 +122,7 @@ p {
   border-radius: 4px;
 }
 
-/* ================= 탭 UI 스타일 ================= */
+/* 탭 UI */
 .tab-menu {
   display: flex;
   gap: 8px;
@@ -174,100 +174,260 @@ p {
   padding-left: 5px;
 }
 
-/* ================= 폼 & 피드백 스타일 ================= */
+
+.flow-desc {
+  margin-bottom: 24px;
+  color: #4a5568;
+}
+
+/* 상단 스텝 인디케이터 */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding: 0 10px;
+}
+
+.step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #a0aec0;
+  font-weight: bold;
+  flex: 1;
+}
+
+.step-indicator span {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.step-indicator.active span {
+  background-color: #3182ce;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px #bee3f8;
+}
+
+.step-indicator.active p {
+  color: #2b6cb0;
+}
+
+.step-indicator.completed span {
+  background-color: #38a169;
+  color: #ffffff;
+}
+
+.step-line {
+  flex: 1;
+  height: 3px;
+  background-color: #e2e8f0;
+  margin: 0 6px 20px;
+}
+
+/* 위저드 단계 전환 */
+.wizard-container {
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.wizard-step {
+  display: none;
+}
+
+.wizard-step.active {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-instruction {
+  font-size: 0.95rem;
+  color: #718096;
+  margin-bottom: 20px;
+}
+
+.input-block {
+  margin-bottom: 16px;
+}
+
+.input-block label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+select, input[type="text"], input[type="email"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  transition: border-color 0.2s;
+}
+
+select:focus, input[type="text"]:focus, input[type="email"]:focus {
+  outline: none;
+  border-color: #3182ce;
+}
+
+/* 에러 메시지 */
+.step-error {
+  color: #e53e3e;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  display: none;
+}
+
+.step-error.show {
+  display: block;
+}
+
+/* 버튼 액션 영역 */
+.step-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.step-actions.right {
+  justify-content: flex-end;
+}
+
+.step-actions.split {
+  justify-content: space-between;
+}
+
+.btn {
+  padding: 12px 22px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.primary-btn {
+  background-color: #3182ce;
+  color: white;
+}
+
+.primary-btn:hover {
+  background-color: #2b6cb0;
+}
+
+.secondary-btn {
+  background-color: #edf2f7;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}
+
+.secondary-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.success-btn {
+  background-color: #38a169;
+  color: white;
+}
+
+.success-btn:hover {
+  background-color: #2f855a;
+}
+
+/* 확인 테이블 (Step 3) */
+.summary-table {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf2f7;
+  font-size: 0.95rem;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  color: #718096;
+  font-weight: bold;
+}
+
+.summary-value {
+  color: #2d3748;
+  font-weight: 500;
+  text-align: right;
+}
+
+
+.completion-box {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.completion-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.completion-message {
+  color: #4a5568;
+  margin-bottom: 20px;
+}
+
+.receipt-card {
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e0;
+  border-radius: 6px;
+  padding: 14px;
+  display: inline-block;
+  margin-bottom: 24px;
+  text-align: left;
+  min-width: 240px;
+}
+
+.badge {
+  background-color: #feebc8;
+  color: #c05621;
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
 .form-box {
   background-color: #f7fafc;
   padding: 20px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
-  margin-top: 15px;
-  width: 100%;
-}
-
-.form-group {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-}
-
-select, input[type="email"], textarea {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  margin-bottom: 10px;
-  border: 1px solid #cbd5e0;
-  border-radius: 4px;
-  font-size: 0.95rem;
-  background-color: #ffffff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-/* input 이벤트 시 실시간 스타일 피드백 */
-input[type="email"].is-valid {
-  border: 2px solid #38a169;
-  background-color: #f0fff4;
-}
-
-input[type="email"].is-invalid {
-  border: 2px solid #e53e3e;
-  background-color: #fff5f5;
-}
-
-.position-info {
-  font-size: 0.88rem;
-  color: #4a5568;
-  margin-bottom: 12px;
-  padding: 6px 10px;
-  background-color: #edf2f7;
-  border-radius: 4px;
-}
-
-.position-info.selected {
-  background-color: #ebf8ff;
-  color: #2b6cb0;
-  font-weight: bold;
-}
-
-.message {
-  margin-top: 10px;
-  font-size: 0.92rem;
-  font-weight: bold;
-  display: none;
-}
-
-.message.error {
-  display: block;
-  color: #e53e3e;
-}
-
-.message.success {
-  display: block;
-  color: #2f855a;
-}
-
-button {
-  background-color: #3182ce;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  white-space: nowrap;
-}
-
-button:hover:not(:disabled) {
-  background-color: #2b6cb0;
-}
-
-/* 버튼 비활성화 상태 피드백 */
-button:disabled {
-  background-color: #cbd5e0;
-  color: #718096;
-  cursor: not-allowed;
 }
 
 footer {
@@ -278,7 +438,7 @@ footer {
   margin-top: 30px;
 }
 
-/* ================= 반응형 미디어 쿼리 (1100px, 768px, 390px 대응) ================= */
+
 @media (max-width: 768px) {
   body {
     padding: 10px;
@@ -294,30 +454,28 @@ footer {
     gap: 15px;
   }
 
-  .form-group {
+  .step-actions {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .form-group input[type="email"] {
-    margin-bottom: 8px;
-  }
-
-  .form-group button, form button {
+  .step-actions .btn {
     width: 100%;
+  }
+
+  .summary-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .summary-value {
+    text-align: left;
   }
 
   section {
     padding: 20px 15px;
   }
-
-  h1 { font-size: 1.75rem; }
-  h2 { font-size: 1.35rem; }
-  h3 { font-size: 1.1rem; }
-  main { margin: 15px auto; gap: 20px; }
 }
 
-/* 모바일 전용 (390px 스마트폰 뷰포트 대응) */
 @media (max-width: 390px) {
   .tab-menu {
     flex-direction: column;
@@ -329,15 +487,26 @@ footer {
     width: 100%;
     text-align: center;
     border: 1px solid #e2e8f0;
-    border-radius: 4px;
   }
 
-  .tab-btn.active {
-    border-radius: 4px;
-    border: 1px solid #3182ce;
+  .stepper {
+    padding: 0;
+  }
+
+  .step-indicator p {
+    font-size: 0.72rem;
+  }
+
+  .step-indicator span {
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+  }
+
+  .step-line {
+    margin: 0 2px 16px;
   }
 
   h1 { font-size: 1.45rem; }
   h2 { font-size: 1.2rem; }
-  body { padding: 8px 6px; }
 }
