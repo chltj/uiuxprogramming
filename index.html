@@ -17,6 +17,7 @@
         <li><a href="#how-to-use">이용 방법</a></li>
         <li><a href="#matching-flow">프로젝트 매칭 신청</a></li>
         <li><a href="#recommend">추천 프로젝트 참여</a></li>
+        <li><a href="#recruit">팀원 모집 등록</a></li>
         <li><a href="#contact">문의하기</a></li>
       </ul>
     </nav>
@@ -322,6 +323,136 @@
           <p id="request-empty" class="request-empty">아직 보낸 참여 요청이 없습니다. 위 목록에서 [참여 요청하기]를 눌러 보세요.</p>
           <ul id="request-list" class="request-list"></ul>
         </div>
+      </div>
+    </section>
+
+    <!-- 9주차: 팀원 모집 공고 등록 폼 -->
+    <section id="recruit">
+      <h2>팀원 모집 공고 등록</h2>
+      <p class="flow-desc">함께할 팀원을 찾는 팀 리더라면 모집 공고를 등록해 보세요. <strong>*</strong> 표시는 필수 항목입니다.</p>
+
+      <!-- 제출 시 오류 요약 -->
+      <div id="recruit-summary" class="error-summary hidden" role="alert" tabindex="-1">
+        <p class="error-summary-title">⚠️ 아래 항목을 수정해야 등록할 수 있습니다.</p>
+        <ul id="recruit-summary-list"></ul>
+      </div>
+
+      <form id="recruit-form" class="recruit-form" novalidate>
+        <div class="field" data-field="title">
+          <label for="recruit-title"><strong>프로젝트명 *</strong></label>
+          <p id="recruit-title-help" class="field-help">5~30자로 프로젝트를 한눈에 알 수 있게 적어 주세요. 예: 개발자 포트폴리오 SaaS 대시보드</p>
+          <input type="text" id="recruit-title" name="title" maxlength="30" aria-describedby="recruit-title-help recruit-title-msg">
+          <p id="recruit-title-msg" class="field-msg" aria-live="polite">0 / 30자 · 5자 이상 입력해 주세요</p>
+        </div>
+
+        <div class="field" data-field="category">
+          <label for="recruit-category"><strong>프로젝트 분야 *</strong></label>
+          <p id="recruit-category-help" class="field-help">지원자가 분야별로 공고를 찾을 때 사용됩니다.</p>
+          <select id="recruit-category" name="category" aria-describedby="recruit-category-help recruit-category-msg">
+            <option value="">-- 분야를 선택하세요 --</option>
+            <option value="웹 플랫폼 / SaaS">웹 플랫폼 / SaaS</option>
+            <option value="모바일 커뮤니티">모바일 커뮤니티</option>
+            <option value="인공지능 도구 개발">인공지능 도구 개발</option>
+            <option value="이커머스 / 결제">이커머스 / 결제</option>
+          </select>
+          <p id="recruit-category-msg" class="field-msg" aria-live="polite"></p>
+        </div>
+
+        <fieldset class="field" data-field="positions" aria-describedby="recruit-positions-help recruit-positions-msg">
+          <legend><strong>모집 포지션 *</strong></legend>
+          <p id="recruit-positions-help" class="field-help">필요한 포지션을 1개 이상 선택해 주세요. (복수 선택 가능)</p>
+          <div class="choice-group">
+            <label class="choice"><input type="checkbox" name="positions" value="프론트엔드 엔지니어"> 프론트엔드</label>
+            <label class="choice"><input type="checkbox" name="positions" value="백엔드 엔지니어"> 백엔드</label>
+            <label class="choice"><input type="checkbox" name="positions" value="풀스택 엔지니어"> 풀스택</label>
+            <label class="choice"><input type="checkbox" name="positions" value="AI / ML 엔지니어"> AI / ML</label>
+          </div>
+          <p id="recruit-positions-msg" class="field-msg" aria-live="polite"></p>
+        </fieldset>
+
+        <fieldset class="field" data-field="mode">
+          <legend><strong>진행 방식 *</strong></legend>
+          <p class="field-help">오프라인 또는 혼합을 고르면 모임 지역과 주기를 입력할 수 있습니다.</p>
+          <div class="choice-group">
+            <label class="choice"><input type="radio" name="mode" value="온라인" checked> 온라인</label>
+            <label class="choice"><input type="radio" name="mode" value="오프라인"> 오프라인</label>
+            <label class="choice"><input type="radio" name="mode" value="온·오프라인 혼합"> 온·오프라인 혼합</label>
+          </div>
+        </fieldset>
+
+        <!-- 조건부 영역 1: 오프라인 / 혼합 선택 시 -->
+        <div id="offline-area" class="conditional-area hidden">
+          <div class="field" data-field="region">
+            <label for="recruit-region"><strong>모임 지역 *</strong></label>
+            <p id="recruit-region-help" class="field-help">2자 이상, 구 또는 역 단위로 적어 주세요. 예: 서울 강남역</p>
+            <input type="text" id="recruit-region" name="region" maxlength="20" disabled aria-describedby="recruit-region-help recruit-region-msg">
+            <p id="recruit-region-msg" class="field-msg" aria-live="polite"></p>
+          </div>
+          <div class="field" data-field="meeting">
+            <label for="recruit-meeting"><strong>오프라인 모임 주기 *</strong></label>
+            <select id="recruit-meeting" name="meeting" disabled aria-describedby="recruit-meeting-msg">
+              <option value="">-- 모임 주기를 선택하세요 --</option>
+              <option value="주 1회">주 1회</option>
+              <option value="격주 1회">격주 1회</option>
+              <option value="월 1회">월 1회</option>
+            </select>
+            <p id="recruit-meeting-msg" class="field-msg" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="field" data-field="useDeadline">
+          <label class="choice" for="recruit-use-deadline">
+            <input type="checkbox" id="recruit-use-deadline" name="useDeadline">
+            모집 마감일 지정하기
+          </label>
+          <p class="field-help">선택하지 않으면 '상시 모집'으로 등록됩니다.</p>
+        </div>
+
+        <!-- 조건부 영역 2: 마감일 지정 체크 시 -->
+        <div id="deadline-area" class="conditional-area hidden">
+          <div class="field" data-field="deadline">
+            <label for="recruit-deadline"><strong>모집 마감일 *</strong></label>
+            <p id="recruit-deadline-help" class="field-help">오늘 또는 그 이후 날짜를 선택해 주세요.</p>
+            <input type="date" id="recruit-deadline" name="deadline" disabled aria-describedby="recruit-deadline-help recruit-deadline-msg">
+            <p id="recruit-deadline-msg" class="field-msg" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="field" data-field="intro">
+          <label for="recruit-intro"><strong>프로젝트 소개 *</strong></label>
+          <p id="recruit-intro-help" class="field-help">30~300자. 만들려는 서비스, 사용할 기술, 팀원에게 기대하는 점을 적어 주세요.</p>
+          <textarea id="recruit-intro" name="intro" maxlength="300" aria-describedby="recruit-intro-help recruit-intro-msg"></textarea>
+          <p id="recruit-intro-msg" class="field-msg" aria-live="polite">0 / 300자 · 30자 이상 입력해 주세요</p>
+        </div>
+
+        <div class="field" data-field="email">
+          <label for="recruit-email"><strong>팀 리더 연락 이메일 *</strong></label>
+          <p id="recruit-email-help" class="field-help">지원 알림을 받을 주소입니다. 예: leader@example.com</p>
+          <input type="email" id="recruit-email" name="email" aria-describedby="recruit-email-help recruit-email-msg">
+          <p id="recruit-email-msg" class="field-msg" aria-live="polite"></p>
+        </div>
+
+        <p id="recruit-status" class="submit-status hidden" role="status"></p>
+
+        <div class="step-actions split">
+          <button type="button" id="btn-recruit-reset" class="btn secondary-btn">다시 작성</button>
+          <button type="submit" id="btn-recruit-submit" class="btn primary-btn">모집 공고 등록하기</button>
+        </div>
+      </form>
+
+      <!-- 등록 성공 결과 -->
+      <div id="recruit-result" class="recruit-result hidden" role="status" tabindex="-1">
+        <p class="result-title">✅ 모집 공고가 등록되었습니다!</p>
+        <div class="summary-table" id="recruit-result-table"></div>
+        <button type="button" id="btn-recruit-new" class="btn primary-btn">새 공고 작성하기</button>
+      </div>
+
+      <!-- 브라우저에 저장된 내 공고 -->
+      <div class="my-requests">
+        <h3>내가 등록한 모집 공고 <span id="recruit-total" class="request-total">0개</span></h3>
+        <p id="recruit-empty" class="request-empty">아직 등록한 공고가 없습니다.</p>
+        <ul id="recruit-list" class="request-list"></ul>
+        <button type="button" id="btn-recruit-clear" class="btn secondary-btn hidden">저장된 공고 모두 삭제</button>
       </div>
     </section>
 

@@ -754,6 +754,204 @@ select:focus, input[type="text"]:focus, input[type="email"]:focus {
   background-color: #c53030;
 }
 
+/* ===== 9주차: 팀원 모집 공고 등록 폼 ===== */
+.recruit-form {
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.field {
+  margin-bottom: 20px;
+  border: none;
+  min-width: 0;
+}
+
+.field > label:not(.choice),
+.field legend {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+  padding: 0;
+}
+
+.field-help {
+  font-size: 0.85rem;
+  color: #718096;
+  margin-bottom: 8px;
+}
+
+.recruit-form input[type="date"],
+.recruit-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background-color: #ffffff;
+}
+
+.recruit-form textarea {
+  min-height: 120px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.recruit-form input:focus,
+.recruit-form select:focus,
+.recruit-form textarea:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+.recruit-form input:disabled,
+.recruit-form select:disabled {
+  background-color: #edf2f7;
+  cursor: not-allowed;
+}
+
+.choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.choice input {
+  width: 18px;
+  height: 18px;
+}
+
+.choice:has(input:checked) {
+  border-color: #3182ce;
+  background-color: #ebf8ff;
+}
+
+/* 입력 상태 메시지: 대기(회색) / 충족(초록) / 오류(빨강) */
+.field-msg {
+  font-size: 0.85rem;
+  color: #718096;
+  margin: 6px 0 0;
+  min-height: 1.2em;
+}
+
+.field.is-valid .field-msg {
+  color: #2f855a;
+  font-weight: bold;
+}
+
+.field.is-invalid .field-msg {
+  color: #c53030;
+  font-weight: bold;
+}
+
+.field.is-invalid input,
+.field.is-invalid select,
+.field.is-invalid textarea {
+  border-color: #e53e3e;
+  background-color: #fff5f5;
+}
+
+.field.is-valid input:not([type="checkbox"]):not([type="radio"]),
+.field.is-valid select,
+.field.is-valid textarea {
+  border-color: #38a169;
+}
+
+.field.is-invalid .choice {
+  border-color: #feb2b2;
+}
+
+.conditional-area {
+  border-left: 4px solid #3182ce;
+  background-color: #ffffff;
+  border-radius: 0 6px 6px 0;
+  padding: 16px 16px 1px;
+  margin: -8px 0 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.error-summary {
+  background-color: #fff5f5;
+  border: 2px solid #feb2b2;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  color: #c53030;
+}
+
+.error-summary:focus {
+  outline: 3px solid #fc8181;
+}
+
+.error-summary-title {
+  font-weight: bold;
+}
+
+.error-summary ul {
+  padding-left: 20px;
+}
+
+.error-summary a {
+  color: #c53030;
+}
+
+.submit-status {
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.submit-status.pending {
+  background-color: #ebf8ff;
+  color: #2c5282;
+  border: 1px solid #bee3f8;
+}
+
+.submit-status.error {
+  background-color: #fff5f5;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+.recruit-result {
+  background-color: #f0fff4;
+  border: 2px solid #9ae6b4;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.recruit-result:focus {
+  outline: none;
+}
+
+.result-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #276749;
+}
+
+.recruit-result .summary-table {
+  text-align: left;
+}
+
 /* 문의 폼 및 textarea 전용 스타일 */
 .form-box label {
   display: block;
@@ -869,6 +1067,23 @@ footer {
 
   .request-actions .btn {
     flex: 1 1 100%;
+  }
+
+  .recruit-form {
+    padding: 16px;
+  }
+
+  .choice-group {
+    flex-direction: column;
+  }
+
+  .choice {
+    width: 100%;
+  }
+
+  .recruit-result .btn,
+  #btn-recruit-clear {
+    width: 100%;
   }
 
   section {

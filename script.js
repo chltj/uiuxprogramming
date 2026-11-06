@@ -579,4 +579,412 @@ document.addEventListener('DOMContentLoaded', function () {
     showNotice(`✅ ‘${project.title}’ 팀에 참여 요청을 보냈습니다. 팀 리더가 수락하면 ${flowState.email} 주소로 알려 드립니다.`, 'success');
     recNotice.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
+
+
+  // =========================================================
+  // 9주차: 팀원 모집 공고 등록 폼
+  // =========================================================
+
+  const STORAGE_KEY = 'devbridge-recruits';
+
+  const recruitForm = document.getElementById('recruit-form');
+  const recruitSummary = document.getElementById('recruit-summary');
+  const recruitSummaryList = document.getElementById('recruit-summary-list');
+  const recruitStatus = document.getElementById('recruit-status');
+  const btnRecruitSubmit = document.getElementById('btn-recruit-submit');
+  const btnRecruitReset = document.getElementById('btn-recruit-reset');
+  const recruitResult = document.getElementById('recruit-result');
+  const recruitResultTable = document.getElementById('recruit-result-table');
+  const btnRecruitNew = document.getElementById('btn-recruit-new');
+  const recruitTotal = document.getElementById('recruit-total');
+  const recruitEmpty = document.getElementById('recruit-empty');
+  const recruitList = document.getElementById('recruit-list');
+  const btnRecruitClear = document.getElementById('btn-recruit-clear');
+
+  const offlineArea = document.getElementById('offline-area');
+  const deadlineArea = document.getElementById('deadline-area');
+  const recruitRegion = document.getElementById('recruit-region');
+  const recruitMeeting = document.getElementById('recruit-meeting');
+  const recruitUseDeadline = document.getElementById('recruit-use-deadline');
+  const recruitDeadline = document.getElementById('recruit-deadline');
+
+  const SUBMIT_LABEL = btnRecruitSubmit.textContent;
+
+  // 오늘 날짜(YYYY-MM-DD)를 마감일 최솟값으로 지정
+  function getToday() {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now - offset).toISOString().slice(0, 10);
+  }
+  recruitDeadline.min = getToday();
+
+  // 항목별 검증 규칙: 통과하면 null, 실패하면 수정 방법을 담은 문구 반환
+  const recruitFields = {
+    title: {
+      label: '프로젝트명',
+      input: document.getElementById('recruit-title'),
+      max: 30,
+      validate(value) {
+        if (value === '') return '프로젝트명을 입력해 주세요.';
+        if (value.length < 5) return `5자 이상 입력해 주세요. (${5 - value.length}자 더 필요)`;
+        return null;
+      }
+    },
+    category: {
+      label: '프로젝트 분야',
+      input: document.getElementById('recruit-category'),
+      validate(value) {
+        return value === '' ? '프로젝트 분야를 선택해 주세요.' : null;
+      }
+    },
+    positions: {
+      label: '모집 포지션',
+      input: recruitForm.querySelector('input[name="positions"]'),
+      getValue: () => [...recruitForm.querySelectorAll('input[name="positions"]:checked')].map(box => box.value),
+      validate(value) {
+        return value.length === 0 ? '모집할 포지션을 1개 이상 체크해 주세요.' : null;
+      }
+    },
+    region: {
+      label: '모임 지역',
+      input: recruitRegion,
+      validate(value) {
+        if (value === '') return '오프라인 모임 지역을 입력해 주세요.';
+        if (value.length < 2) return '지역을 2자 이상 입력해 주세요. 예: 서울 강남역';
+        return null;
+      }
+    },
+    meeting: {
+      label: '오프라인 모임 주기',
+      input: recruitMeeting,
+      validate(value) {
+        return value === '' ? '오프라인 모임 주기를 선택해 주세요.' : null;
+      }
+    },
+    deadline: {
+      label: '모집 마감일',
+      input: recruitDeadline,
+      validate(value) {
+        if (value === '') return '마감일을 선택하거나, 상시 모집이면 [모집 마감일 지정하기] 체크를 해제해 주세요.';
+        if (value < getToday()) return '지난 날짜는 선택할 수 없습니다. 오늘 이후 날짜를 골라 주세요.';
+        return null;
+      }
+    },
+    intro: {
+      label: '프로젝트 소개',
+      input: document.getElementById('recruit-intro'),
+      max: 300,
+      validate(value) {
+        if (value === '') return '프로젝트 소개를 입력해 주세요.';
+        if (value.length < 30) return `30자 이상 입력해 주세요. (${30 - value.length}자 더 필요) 사용할 기술이나 기대하는 팀원 모습을 덧붙여 보세요.`;
+        return null;
+      }
+    },
+    email: {
+      label: '팀 리더 연락 이메일',
+      input: document.getElementById('recruit-email'),
+      validate(value) {
+        if (value === '') return '연락받을 이메일 주소를 입력해 주세요.';
+        if (!emailRegex.test(value)) return '이메일 형식이 올바르지 않습니다. @와 도메인을 포함해 주세요. 예: leader@example.com';
+        return null;
+      }
+    }
+  };
+
+  // 오류 문구를 화면에 드러낼지 여부 (입력 후 포커스를 벗어났거나 제출을 시도한 항목)
+  const shownFields = new Set();
+
+  function getFieldValue(name) {
+    const field = recruitFields[name];
+    return field.getValue ? field.getValue() : field.input.value.trim();
+  }
+
+  function isFieldActive(name) {
+    return !recruitFields[name].input.disabled;
+  }
+
+  // 한 항목의 상태(대기 / 충족 / 오류)를 문구와 색으로 함께 표시
+  function renderField(name) {
+    const field = recruitFields[name];
+    const wrapper = recruitForm.querySelector(`[data-field="${name}"]`);
+    const msg = document.getElementById(`recruit-${name}-msg`);
+    const value = getFieldValue(name);
+    const error = field.validate(value);
+    const counter = field.max ? `${value.length} / ${field.max}자 · ` : '';
+
+    wrapper.classList.remove('is-valid', 'is-invalid');
+
+    if (!error) {
+      wrapper.classList.add('is-valid');
+      msg.textContent = `${counter}✔ 조건 충족`;
+    } else if (shownFields.has(name)) {
+      wrapper.classList.add('is-invalid');
+      msg.textContent = `${counter}✖ ${error}`;
+    } else {
+      msg.textContent = field.max ? `${counter}${error}` : '';
+    }
+
+    if (field.input.tagName !== 'INPUT' || field.input.type !== 'checkbox') {
+      field.input.setAttribute('aria-invalid', String(Boolean(error) && shownFields.has(name)));
+    }
+    return error;
+  }
+
+  // 조건부 입력 영역 표시 + disabled 전환
+  function updateConditionalAreas() {
+    const mode = recruitForm.querySelector('input[name="mode"]:checked').value;
+    const showOffline = mode !== '온라인';
+    offlineArea.classList.toggle('hidden', !showOffline);
+    recruitRegion.disabled = !showOffline;
+    recruitMeeting.disabled = !showOffline;
+
+    const showDeadline = recruitUseDeadline.checked;
+    deadlineArea.classList.toggle('hidden', !showDeadline);
+    recruitDeadline.disabled = !showDeadline;
+
+    // 숨겨진 영역은 오류 표시 대상에서 제외
+    if (!showOffline) { shownFields.delete('region'); shownFields.delete('meeting'); }
+    if (!showDeadline) shownFields.delete('deadline');
+  }
+
+  function updateSummary() {
+    if (recruitSummary.classList.contains('hidden')) return;
+    const errors = Object.keys(recruitFields).filter(name => isFieldActive(name) && recruitFields[name].validate(getFieldValue(name)));
+    if (errors.length === 0) {
+      recruitSummary.classList.add('hidden');
+      return;
+    }
+    fillSummary(errors);
+  }
+
+  function fillSummary(errorNames) {
+    recruitSummaryList.innerHTML = '';
+    errorNames.forEach(name => {
+      const field = recruitFields[name];
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = '#' + field.input.id;
+      link.textContent = `${field.label}: ${field.validate(getFieldValue(name))}`;
+      link.addEventListener('click', event => {
+        event.preventDefault();
+        field.input.focus();
+      });
+      item.appendChild(link);
+      recruitSummaryList.appendChild(item);
+    });
+  }
+
+  function setRecruitStatus(message, type) {
+    recruitStatus.textContent = message;
+    recruitStatus.className = 'submit-status ' + type;
+  }
+
+  function setSubmitting(isSubmitting) {
+    btnRecruitSubmit.disabled = isSubmitting;
+    btnRecruitReset.disabled = isSubmitting;
+    btnRecruitSubmit.textContent = isSubmitting ? '등록 중…' : SUBMIT_LABEL;
+    recruitForm.setAttribute('aria-busy', String(isSubmitting));
+  }
+
+  // 브라우저 저장소 읽기 / 쓰기
+  function loadRecruits() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveRecruits(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  function describeRecruit(post) {
+    const place = post.mode === '온라인' ? '온라인' : `${post.mode} (${post.region}, ${post.meeting})`;
+    return {
+      '프로젝트명': post.title,
+      '분야': post.category,
+      '모집 포지션': post.positions.join(', '),
+      '진행 방식': place,
+      '마감일': post.deadline || '상시 모집',
+      '연락 이메일': post.email
+    };
+  }
+
+  function renderRecruitList() {
+    const list = loadRecruits();
+    recruitTotal.textContent = `${list.length}개`;
+    recruitEmpty.classList.toggle('hidden', list.length > 0);
+    btnRecruitClear.classList.toggle('hidden', list.length === 0);
+    recruitList.innerHTML = '';
+
+    list.slice().reverse().forEach(post => {
+      const info = describeRecruit(post);
+      const item = document.createElement('li');
+      item.className = 'request-item';
+
+      const box = document.createElement('div');
+      box.className = 'request-info';
+
+      const title = document.createElement('p');
+      title.className = 'request-item-title';
+      title.innerHTML = '<span class="badge">모집 중</span> ';
+      title.appendChild(document.createTextNode(post.title));
+
+      const meta = document.createElement('p');
+      meta.className = 'request-meta';
+      meta.textContent = `${info['분야']} · ${info['모집 포지션']} · ${info['진행 방식']} · 마감 ${info['마감일']}`;
+
+      box.append(title, meta);
+      item.appendChild(box);
+      recruitList.appendChild(item);
+    });
+  }
+
+  function resetRecruitForm() {
+    recruitForm.reset();
+    shownFields.clear();
+    updateConditionalAreas();
+    Object.keys(recruitFields).forEach(renderField);
+    recruitSummary.classList.add('hidden');
+    recruitStatus.className = 'submit-status hidden';
+    setSubmitting(false);
+  }
+
+  // 입력하는 동안 글자 수·조건 충족 여부 갱신
+  recruitForm.addEventListener('input', function (event) {
+    const name = event.target.name;
+    if (recruitFields[name]) renderField(name);
+    updateSummary();
+  });
+
+  recruitForm.addEventListener('change', function (event) {
+    const name = event.target.name;
+    if (name === 'mode' || name === 'useDeadline') {
+      updateConditionalAreas();
+      ['region', 'meeting', 'deadline'].forEach(renderField);
+    }
+    if (name === 'positions' || name === 'category' || name === 'meeting' || name === 'deadline') {
+      shownFields.add(name);
+    }
+    if (recruitFields[name]) renderField(name);
+    updateSummary();
+  });
+
+  // 값을 입력하고 벗어난 항목부터 오류를 보여 줌
+  recruitForm.addEventListener('focusout', function (event) {
+    const name = event.target.name;
+    if (!recruitFields[name] || event.target.type === 'checkbox') return;
+    if (event.target.value.trim() !== '') {
+      shownFields.add(name);
+      renderField(name);
+    }
+  });
+
+  recruitForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    // 1) 활성화된 항목만 검사 (숨겨진 disabled 항목은 제외)
+    const activeNames = Object.keys(recruitFields).filter(isFieldActive);
+    activeNames.forEach(name => shownFields.add(name));
+    const errorNames = activeNames.filter(name => renderField(name));
+
+    if (errorNames.length > 0) {
+      fillSummary(errorNames);
+      recruitSummary.classList.remove('hidden');
+      setRecruitStatus(`등록하지 못했습니다. 수정이 필요한 항목 ${errorNames.length}개를 확인해 주세요.`, 'error');
+      recruitSummary.focus();
+      return;
+    }
+
+    recruitSummary.classList.add('hidden');
+
+    // 2) 제출 중: 진행 문구 + 버튼 비활성화로 중복 제출 방지
+    setSubmitting(true);
+    setRecruitStatus('⏳ 모집 공고를 등록하는 중입니다. 잠시만 기다려 주세요…', 'pending');
+
+    const post = {
+      title: getFieldValue('title'),
+      category: getFieldValue('category'),
+      positions: getFieldValue('positions'),
+      mode: recruitForm.querySelector('input[name="mode"]:checked').value,
+      region: isFieldActive('region') ? getFieldValue('region') : '',
+      meeting: isFieldActive('meeting') ? getFieldValue('meeting') : '',
+      deadline: isFieldActive('deadline') ? getFieldValue('deadline') : '',
+      intro: getFieldValue('intro'),
+      email: getFieldValue('email'),
+      createdAt: new Date().toISOString()
+    };
+
+    setTimeout(function () {
+      const list = loadRecruits();
+
+      // 3) 실패: 같은 이름의 공고가 이미 있으면 등록 거부 (입력값은 그대로 유지)
+      const duplicated = list.some(item => item.title.toLowerCase() === post.title.toLowerCase());
+      if (duplicated) {
+        setSubmitting(false);
+        setRecruitStatus(`❌ 등록 실패: ‘${post.title}’ 이름의 공고가 이미 있습니다. 입력한 내용은 그대로 남아 있으니 프로젝트명만 바꿔 다시 등록해 주세요.`, 'error');
+        const titleWrapper = recruitForm.querySelector('[data-field="title"]');
+        titleWrapper.classList.remove('is-valid');
+        titleWrapper.classList.add('is-invalid');
+        document.getElementById('recruit-title-msg').textContent = `${post.title.length} / 30자 · ✖ 이미 등록된 프로젝트명입니다. 다른 이름으로 바꿔 주세요.`;
+        recruitFields.title.input.focus();
+        return;
+      }
+
+      // 4) 실패: 브라우저 저장소에 저장할 수 없는 경우
+      try {
+        list.push(post);
+        saveRecruits(list);
+      } catch (e) {
+        setSubmitting(false);
+        setRecruitStatus('❌ 등록 실패: 브라우저 저장 공간에 저장하지 못했습니다. 입력 내용은 그대로 남아 있으니 잠시 후 다시 [모집 공고 등록하기]를 눌러 주세요.', 'error');
+        return;
+      }
+
+      // 5) 성공: 완료 안내 + 등록 내용 요약
+      const info = describeRecruit(post);
+      recruitResultTable.innerHTML = '';
+      Object.keys(info).forEach(label => {
+        const row = document.createElement('div');
+        row.className = 'summary-row';
+        const key = document.createElement('span');
+        key.className = 'summary-label';
+        key.textContent = label;
+        const val = document.createElement('span');
+        val.className = 'summary-value';
+        val.textContent = info[label];
+        row.append(key, val);
+        recruitResultTable.appendChild(row);
+      });
+
+      recruitForm.classList.add('hidden');
+      recruitResult.classList.remove('hidden');
+      renderRecruitList();
+      recruitResult.focus();
+    }, 1200);
+  });
+
+  btnRecruitReset.addEventListener('click', function () {
+    resetRecruitForm();
+    recruitFields.title.input.focus();
+  });
+
+  btnRecruitNew.addEventListener('click', function () {
+    resetRecruitForm();
+    recruitResult.classList.add('hidden');
+    recruitForm.classList.remove('hidden');
+    recruitFields.title.input.focus();
+  });
+
+  btnRecruitClear.addEventListener('click', function () {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) { /* 저장소 접근 불가 시 무시 */ }
+    renderRecruitList();
+  });
+
+  // 초기 상태
+  resetRecruitForm();
+  renderRecruitList();
 });
