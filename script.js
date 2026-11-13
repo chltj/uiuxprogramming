@@ -811,14 +811,58 @@ document.addEventListener('DOMContentLoaded', function () {
     };
   }
 
+  // 10주차: 진행 방식 필터 상태
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const recruitResultCount = document.getElementById('recruit-result-count');
+  const recruitFilterEmpty = document.getElementById('recruit-filter-empty');
+  const recruitFilterEmptyText = document.getElementById('recruit-filter-empty-text');
+  let recruitFilter = '전체';
+
+  function setRecruitFilter(filter) {
+    recruitFilter = filter;
+    // 선택 표시(색)와 aria-pressed를 함께 갱신
+    filterButtons.forEach(btn => {
+      const selected = btn.dataset.filter === filter;
+      btn.classList.toggle('active', selected);
+      btn.setAttribute('aria-pressed', String(selected));
+    });
+    renderRecruitList();
+  }
+
   function renderRecruitList() {
     const list = loadRecruits();
+    const filtered = recruitFilter === '전체' ? list : list.filter(post => post.mode === recruitFilter);
+
     recruitTotal.textContent = `${list.length}개`;
-    recruitEmpty.classList.toggle('hidden', list.length > 0);
     btnRecruitClear.classList.toggle('hidden', list.length === 0);
+
+    // 필터 버튼마다 해당 공고 수 표시
+    filterButtons.forEach(btn => {
+      const filter = btn.dataset.filter;
+      const count = filter === '전체' ? list.length : list.filter(post => post.mode === filter).length;
+      btn.querySelector('.filter-count').textContent = count;
+    });
+
+    // 결과 수 안내 + 빈 결과 두 가지 구분
+    recruitEmpty.classList.add('hidden');
+    recruitFilterEmpty.classList.add('hidden');
+
+    if (list.length === 0) {
+      recruitResultCount.textContent = '등록된 공고 0개';
+      recruitEmpty.classList.remove('hidden');
+    } else if (filtered.length === 0) {
+      recruitResultCount.textContent = `전체 ${list.length}개 중 ‘${recruitFilter}’ 공고 0개`;
+      recruitFilterEmptyText.textContent = `‘${recruitFilter}’ 방식으로 등록된 공고가 없습니다.`;
+      recruitFilterEmpty.classList.remove('hidden');
+    } else if (recruitFilter === '전체') {
+      recruitResultCount.textContent = `전체 공고 ${list.length}개를 표시하고 있습니다.`;
+    } else {
+      recruitResultCount.textContent = `전체 ${list.length}개 중 ‘${recruitFilter}’ 공고 ${filtered.length}개를 표시하고 있습니다.`;
+    }
+
     recruitList.innerHTML = '';
 
-    list.slice().reverse().forEach(post => {
+    filtered.slice().reverse().forEach(post => {
       const info = describeRecruit(post);
       const item = document.createElement('li');
       item.className = 'request-item';
@@ -960,7 +1004,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       recruitForm.classList.add('hidden');
       recruitResult.classList.remove('hidden');
-      renderRecruitList();
+      // 방금 등록한 공고가 목록에서 보이도록 필터를 '전체'로 되돌림
+      setRecruitFilter('전체');
       recruitResult.focus();
     }, 1200);
   });
@@ -984,7 +1029,161 @@ document.addEventListener('DOMContentLoaded', function () {
     renderRecruitList();
   });
 
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => setRecruitFilter(btn.dataset.filter));
+  });
+
+  // 조건 결과 없음 → 전체 보기
+  document.getElementById('btn-recruit-filter-all').addEventListener('click', function () {
+    setRecruitFilter('전체');
+  });
+
+  // 전체 목록 없음 → 공고 작성하러 가기
+  document.getElementById('btn-recruit-write').addEventListener('click', function () {
+    if (!recruitResult.classList.contains('hidden')) btnRecruitNew.click();
+    recruitForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    recruitFields.title.input.focus({ preventScroll: true });
+  });
+
+  // 전체 목록 없음 → 예시 공고 불러오기
+  document.getElementById('btn-recruit-sample').addEventListener('click', function () {
+    const samples = [
+      { title: '개발자 커뮤니티 Q&A 웹 서비스', category: '웹 플랫폼 / SaaS', positions: ['프론트엔드 엔지니어', '백엔드 엔지니어'], mode: '온라인', region: '', meeting: '', deadline: '', intro: 'React와 Spring Boot로 개발자 질문·답변 커뮤니티를 만듭니다. 매주 온라인 회의로 진행합니다.', email: 'leader1@example.com' },
+      { title: '캠퍼스 중고거래 모바일 앱', category: '모바일 커뮤니티', positions: ['풀스택 엔지니어'], mode: '오프라인', region: '서울 신촌역', meeting: '주 1회', deadline: '', intro: 'Flutter와 Firebase로 대학가 중고거래 앱을 만듭니다. 신촌에서 주 1회 모여 작업합니다.', email: 'leader2@example.com' },
+      { title: 'AI 면접 연습 도우미', category: '인공지능 도구 개발', positions: ['AI / ML 엔지니어', '프론트엔드 엔지니어'], mode: '온라인', region: '', meeting: '', deadline: '', intro: 'LLM API로 개발자 기술 면접 질문을 만들고 답변을 피드백하는 도구를 개발합니다.', email: 'leader3@example.com' }
+    ].map(post => ({ ...post, createdAt: new Date().toISOString() }));
+
+    try {
+      saveRecruits(samples);
+    } catch (e) {
+      recruitResultCount.textContent = '브라우저 저장 공간을 사용할 수 없어 예시 공고를 불러오지 못했습니다.';
+      return;
+    }
+    setRecruitFilter('전체');
+  });
+
   // 초기 상태
   resetRecruitForm();
   renderRecruitList();
+
+
+  // =========================================================
+  // 10주차: 주요 메뉴 현재 위치 표시 + 모바일 메뉴
+  // =========================================================
+
+  const siteHeader = document.getElementById('site-header');
+  const menuToggle = document.getElementById('menu-toggle');
+  const menuToggleText = menuToggle.querySelector('.menu-toggle-text');
+  const menuIcon = menuToggle.querySelector('.menu-icon');
+  const mainNav = document.querySelector('.main-nav');
+  const menuLinks = document.querySelectorAll('.main-menu a');
+  const mobileQuery = window.matchMedia('(max-width: 768px)');
+
+  // 페이지 순서대로 [섹션, 해당 메뉴] 짝 만들기
+  const sectionMenuPairs = [];
+  menuLinks.forEach(link => {
+    link.dataset.sections.split(' ').forEach(id => {
+      const section = document.getElementById(id);
+      if (section) sectionMenuPairs.push({ section, link });
+    });
+  });
+  sectionMenuPairs.sort((a, b) => a.section.offsetTop - b.section.offsetTop);
+
+  function setCurrentMenu(currentLink) {
+    menuLinks.forEach(link => {
+      const isCurrent = link === currentLink;
+      link.classList.toggle('current', isCurrent);
+      if (isCurrent) {
+        link.setAttribute('aria-current', 'location');
+      } else {
+        link.removeAttribute('aria-current');
+      }
+    });
+  }
+
+  // 실제 화면 위치를 기준으로 현재 메뉴 계산
+  function updateCurrentFromScroll() {
+    const offset = siteHeader.offsetHeight + 40;
+    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+    let current = sectionMenuPairs[0];
+
+    if (atBottom) {
+      current = sectionMenuPairs[sectionMenuPairs.length - 1];
+    } else {
+      sectionMenuPairs.forEach(pair => {
+        if (pair.section.getBoundingClientRect().top <= offset) current = pair;
+      });
+    }
+    setCurrentMenu(current.link);
+  }
+
+  // 메뉴 클릭 직후 부드러운 스크롤 동안 표시가 깜박이지 않도록 잠시 고정
+  let lockUntil = 0;
+
+  window.addEventListener('scroll', function () {
+    if (Date.now() >= lockUntil) updateCurrentFromScroll();
+  }, { passive: true });
+
+  // 스크롤이 끝나면 고정을 풀고 실제 위치로 다시 맞춤
+  window.addEventListener('scrollend', function () {
+    lockUntil = 0;
+    updateCurrentFromScroll();
+  });
+
+  // 뒤로 가기·앞으로 가기로 위치가 바뀐 경우
+  window.addEventListener('hashchange', function () {
+    setTimeout(updateCurrentFromScroll, 50);
+  });
+  window.addEventListener('popstate', function () {
+    setTimeout(updateCurrentFromScroll, 50);
+  });
+
+  // 헤더 높이를 CSS 변수로 전달해 이동한 섹션 제목이 헤더에 가리지 않게 함
+  function syncHeaderHeight() {
+    document.documentElement.style.setProperty('--header-h', siteHeader.offsetHeight + 'px');
+  }
+
+  function setMenuOpen(open) {
+    mainNav.classList.toggle('is-open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggleText.textContent = open ? '메뉴 닫기' : '메뉴 열기';
+    menuIcon.textContent = open ? '✕' : '☰';
+  }
+
+  menuToggle.addEventListener('click', function () {
+    setMenuOpen(menuToggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  menuLinks.forEach(link => {
+    link.addEventListener('click', function () {
+      setCurrentMenu(link);
+      lockUntil = Date.now() + 1000;
+      // 목적지를 고르면 모바일 메뉴 닫기
+      if (mobileQuery.matches) setMenuOpen(false);
+    });
+  });
+
+  // Esc 키로 모바일 메뉴 닫기
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && mainNav.classList.contains('is-open')) {
+      setMenuOpen(false);
+      menuToggle.focus();
+    }
+  });
+
+  // 넓은 화면으로 바뀌면 모바일 메뉴 상태 초기화
+  mobileQuery.addEventListener('change', function () {
+    setMenuOpen(false);
+    syncHeaderHeight();
+  });
+
+  window.addEventListener('resize', syncHeaderHeight);
+
+  // 첫 로드 / 새로고침: 브라우저가 스크롤 위치를 복원한 뒤 계산
+  syncHeaderHeight();
+  updateCurrentFromScroll();
+  window.addEventListener('load', function () {
+    syncHeaderHeight();
+    updateCurrentFromScroll();
+  });
 });

@@ -13,9 +13,13 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 header {
   background-color: #ffffff;
-  padding: 15px 20px;
+  padding: 12px 20px;
   border-bottom: 2px solid #e9ecef;
   position: sticky;
   top: 0;
@@ -23,25 +27,148 @@ header {
   width: 100%;
 }
 
-nav ul {
-  list-style: none;
+/* 10주차: 주요 메뉴 */
+.main-nav {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
   flex-wrap: wrap;
+  gap: 8px 20px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-nav a {
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #1a365d;
+  text-decoration: none;
+}
+
+.menu-toggle {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #2d3748;
+  cursor: pointer;
+}
+
+.menu-toggle[aria-expanded="true"] {
+  background-color: #ebf8ff;
+  border-color: #3182ce;
+  color: #2b6cb0;
+}
+
+.main-menu {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.main-menu a {
+  display: block;
   text-decoration: none;
   color: #495057;
   font-weight: bold;
-  font-size: 1rem;
-  transition: color 0.2s;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-bottom: 3px solid transparent;
+  transition: color 0.2s, background-color 0.2s;
 }
 
-nav a:hover {
+.main-menu a:hover {
   color: #2b6cb0;
+  background-color: #f7fafc;
+}
+
+/* 현재 위치 메뉴: 배경색 + 굵은 밑줄로 구분 */
+.main-menu a.current {
+  color: #2b6cb0;
+  background-color: #ebf8ff;
+  border-bottom-color: #3182ce;
+}
+
+.main-menu a:focus-visible,
+.menu-toggle:focus-visible,
+.filter-btn:focus-visible {
+  outline: 3px solid #90cdf4;
+  outline-offset: 2px;
+}
+
+/* 메뉴로 이동한 섹션 제목이 고정 헤더에 가리지 않도록 */
+section {
+  scroll-margin-top: calc(var(--header-h, 64px) + 12px);
+}
+
+/* 10주차: 진행 방식 필터 버튼 */
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.filter-btn {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: #3182ce;
+  color: #2b6cb0;
+}
+
+.filter-btn.active {
+  background-color: #3182ce;
+  border-color: #3182ce;
+  color: #ffffff;
+}
+
+.filter-btn.active::before {
+  content: '✔ ';
+}
+
+.filter-count {
+  display: inline-block;
+  min-width: 1.6em;
+  margin-left: 2px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background-color: #edf2f7;
+  color: #4a5568;
+  font-size: 0.8rem;
+}
+
+.filter-btn.active .filter-count {
+  background-color: #ffffff;
+  color: #2b6cb0;
+}
+
+#recruit .empty-box {
+  margin-bottom: 16px;
 }
 
 main {
@@ -1008,9 +1135,46 @@ footer {
     padding: 10px;
   }
 
-  nav ul {
+  header {
+    padding: 10px 12px;
+  }
+
+  /* 좁은 화면: 버튼으로 메뉴 열기·닫기 */
+  .main-nav {
     flex-direction: column;
-    gap: 10px;
+    align-items: stretch;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .main-menu {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 6px 0 4px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .main-nav.is-open .main-menu {
+    display: flex;
+  }
+
+  .main-menu a {
+    padding: 12px;
+    border-bottom: none;
+    border-left: 4px solid transparent;
+    border-radius: 0 6px 6px 0;
+  }
+
+  .main-menu a.current {
+    border-left-color: #3182ce;
+  }
+
+  .filter-btn {
+    flex: 1 1 calc(50% - 8px);
   }
 
   #features .grid-container {

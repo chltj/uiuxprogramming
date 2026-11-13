@@ -8,17 +8,24 @@
 </head>
 <body>
 
-  <header>
-    <nav>
-      <ul>
-        <li><a href="#about">서비스 소개</a></li>
-        <li><a href="#features">주요 기능</a></li>
-        <li><a href="#explore">프로젝트 탐색</a></li>
-        <li><a href="#how-to-use">이용 방법</a></li>
-        <li><a href="#matching-flow">프로젝트 매칭 신청</a></li>
-        <li><a href="#recommend">추천 프로젝트 참여</a></li>
-        <li><a href="#recruit">팀원 모집 등록</a></li>
-        <li><a href="#contact">문의하기</a></li>
+  <header id="site-header">
+    <nav class="main-nav" aria-label="주요 메뉴">
+      <div class="nav-bar">
+        <a href="#hero" class="brand">DevBridge</a>
+        <!-- 10주차: 좁은 화면 전용 메뉴 열기·닫기 버튼 -->
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="main-menu">
+          <span class="menu-icon" aria-hidden="true">☰</span>
+          <span class="menu-toggle-text">메뉴 열기</span>
+        </button>
+      </div>
+      <ul id="main-menu" class="main-menu">
+        <li><a href="#about" data-sections="hero about features">서비스 소개</a></li>
+        <li><a href="#explore" data-sections="explore">프로젝트 둘러보기</a></li>
+        <li><a href="#how-to-use" data-sections="how-to-use">이용 방법</a></li>
+        <li><a href="#matching-flow" data-sections="matching-flow">매칭 신청</a></li>
+        <li><a href="#recommend" data-sections="recommend">추천 프로젝트</a></li>
+        <li><a href="#recruit" data-sections="recruit">팀원 모집 등록</a></li>
+        <li><a href="#contact" data-sections="contact">문의하기</a></li>
       </ul>
     </nav>
   </header>
@@ -110,7 +117,7 @@
 
     <!-- 7주차 4단계 매칭 신청 위저드 -->
     <section id="matching-flow">
-      <h2>팀원 매칭 원스톱 신청</h2>
+      <h2>매칭 신청 (팀원 매칭 원스톱 신청)</h2>
       <p class="flow-desc">관심 프로젝트에 참여하기 위한 4단계 매칭 프로세스를 완료해 보세요.</p>
 
       <div class="stepper" aria-label="진행 단계">
@@ -449,8 +456,37 @@
 
       <!-- 브라우저에 저장된 내 공고 -->
       <div class="my-requests">
-        <h3>내가 등록한 모집 공고 <span id="recruit-total" class="request-total">0개</span></h3>
-        <p id="recruit-empty" class="request-empty">아직 등록한 공고가 없습니다.</p>
+        <h3 id="recruit-list-title">내가 등록한 모집 공고 <span id="recruit-total" class="request-total">0개</span></h3>
+
+        <!-- 10주차: 진행 방식 필터 -->
+        <div class="filter-buttons" role="group" aria-label="진행 방식으로 공고 걸러 보기">
+          <button type="button" class="filter-btn active" data-filter="전체" aria-pressed="true">전체 <span class="filter-count">0</span></button>
+          <button type="button" class="filter-btn" data-filter="온라인" aria-pressed="false">온라인 <span class="filter-count">0</span></button>
+          <button type="button" class="filter-btn" data-filter="오프라인" aria-pressed="false">오프라인 <span class="filter-count">0</span></button>
+          <button type="button" class="filter-btn" data-filter="온·오프라인 혼합" aria-pressed="false">온·오프라인 혼합 <span class="filter-count">0</span></button>
+        </div>
+
+        <p id="recruit-result-count" class="rec-count" aria-live="polite"></p>
+
+        <!-- 빈 결과 1: 등록된 공고가 하나도 없음 -->
+        <div id="recruit-empty" class="empty-box hidden">
+          <p class="empty-title">📭 아직 등록한 모집 공고가 없습니다.</p>
+          <p>위 폼에서 첫 공고를 등록하거나, 예시 공고를 불러와 필터를 사용해 보세요.</p>
+          <div class="step-actions center">
+            <button type="button" id="btn-recruit-write" class="btn primary-btn">공고 작성하러 가기</button>
+            <button type="button" id="btn-recruit-sample" class="btn secondary-btn">예시 공고 3개 불러오기</button>
+          </div>
+        </div>
+
+        <!-- 빈 결과 2: 공고는 있지만 선택한 조건에 맞는 공고가 없음 -->
+        <div id="recruit-filter-empty" class="empty-box hidden">
+          <p class="empty-title">🔍 <span id="recruit-filter-empty-text"></span></p>
+          <p>다른 진행 방식을 선택하거나 전체 공고를 확인해 보세요.</p>
+          <div class="step-actions center">
+            <button type="button" id="btn-recruit-filter-all" class="btn primary-btn">전체 공고 보기</button>
+          </div>
+        </div>
+
         <ul id="recruit-list" class="request-list"></ul>
         <button type="button" id="btn-recruit-clear" class="btn secondary-btn hidden">저장된 공고 모두 삭제</button>
       </div>
