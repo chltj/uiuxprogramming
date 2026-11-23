@@ -2,15 +2,34 @@ document.addEventListener('DOMContentLoaded', function () {
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabPanes = document.querySelectorAll('.tab-pane');
 
-  tabButtons.forEach(function (button) {
-    button.addEventListener('click', function () {
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
+  // 11주차: 선택 상태를 aria-selected로도 알리고, 선택된 탭만 Tab 키로 들어오게 함
+  function selectTab(button) {
+    tabButtons.forEach(btn => {
+      const selected = btn === button;
+      btn.classList.toggle('active', selected);
+      btn.setAttribute('aria-selected', String(selected));
+      btn.tabIndex = selected ? 0 : -1;
+    });
 
-      const targetTabId = button.getAttribute('data-tab');
-      tabPanes.forEach(pane => {
-        pane.classList.toggle('active', pane.id === targetTabId);
-      });
+    const targetTabId = button.getAttribute('data-tab');
+    tabPanes.forEach(pane => {
+      pane.classList.toggle('active', pane.id === targetTabId);
+    });
+  }
+
+  tabButtons.forEach(function (button, index) {
+    button.addEventListener('click', function () {
+      selectTab(button);
+    });
+
+    // ← → Home End 키로 탭 이동
+    button.addEventListener('keydown', function (event) {
+      const keys = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabButtons.length - 1 };
+      if (!(event.key in keys)) return;
+      event.preventDefault();
+      const next = tabButtons[(keys[event.key] + tabButtons.length) % tabButtons.length];
+      selectTab(next);
+      next.focus();
     });
   });
 
@@ -67,14 +86,24 @@ document.addEventListener('DOMContentLoaded', function () {
       step.classList.toggle('active', idx + 1 === targetStep);
     });
 
-    // 상단 인디케이터 상태 갱신
+    // 상단 인디케이터 상태 갱신: 색 + 기호(✓) + 문구(완료 / 현재 단계)
     stepIndicators.forEach((indicator, idx) => {
       const stepNum = idx + 1;
+      const num = indicator.querySelector('.step-num');
+      const state = indicator.querySelector('.step-state');
       indicator.classList.remove('active', 'completed');
+      indicator.removeAttribute('aria-current');
+      num.textContent = stepNum;
+      state.textContent = '';
+
       if (stepNum === targetStep) {
         indicator.classList.add('active');
+        indicator.setAttribute('aria-current', 'step');
+        state.textContent = ' (현재 단계)';
       } else if (stepNum < targetStep) {
         indicator.classList.add('completed');
+        num.textContent = '✓';
+        state.textContent = ' (완료)';
       }
     });
 
@@ -88,22 +117,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 모바일 등에서 단계 전환 시 폼 상단으로 부드럽게 스크롤
     document.getElementById('matching-flow').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // 11주차: 누른 버튼이 사라져도 키보드 초점이 페이지 맨 위로 튀지 않도록 새 단계 제목으로 이동
+    const heading = wizardSteps[targetStep - 1].querySelector('h3');
+    if (heading) heading.focus({ preventScroll: true });
   }
 
- 
+  // 11주차: 오류가 있는 입력칸을 aria-invalid로 표시
+  function markInvalid(fields, invalidFields) {
+    fields.forEach(field => field.setAttribute('aria-invalid', String(invalidFields.includes(field))));
+  }
+
+
   btnToStep2.addEventListener('click', function () {
     const selectedPosition = flowPosition.value;
     const selectedCategory = flowCategory.value;
 
-    // 조건 검증: 필수 선택 누락 여부 확인
-    if (!selectedPosition || !selectedCategory) {
-      errorStep1.textContent = '⚠️ 희망 포지션과 관심 프로젝트 분야를 모두 선택해 주세요.';
+    // 조건 검증: 빠진 항목을 구체적으로 안내하고 첫 번째 빈 칸으로 초점 이동
+    const missing = [];
+    if (!selectedPosition) missing.push(flowPosition);
+    if (!selectedCategory) missing.push(flowCategory);
+
+    if (missing.length > 0) {
+      const names = missing.map(field => field === flowPosition ? '희망 포지션' : '관심 프로젝트 분야');
+      errorStep1.textContent = `⚠️ 선택하지 않은 항목이 있습니다: ${names.join(", ")}. 목록을 열어 하나씩 골라 주세요.`;
       errorStep1.classList.add('show');
+      markInvalid([flowPosition, flowCategory], missing);
+      missing[0].focus();
       return;
     }
 
     // 통과 시 상태 저장 및 에러 초기화
     errorStep1.classList.remove('show');
+    markInvalid([flowPosition, flowCategory], []);
     flowState.position = selectedPosition;
     flowState.category = selectedCategory;
 
@@ -131,21 +177,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     if (inputName === '') {
-      errorStep2.textContent = '⚠️ 신청자 이름을 입력해 주세요.';
+      errorStep2.textContent = '⚠️ 신청자 이름이 비어 있습니다. 이름이나 닉네임을 입력해 주세요. (예: 김개발)';
       errorStep2.classList.add('show');
+      markInvalid([flowName, flowEmail], [flowName]);
       flowName.focus();
       return;
     }
 
-    
+
     if (!emailRegex.test(inputEmail)) {
-      errorStep2.textContent = '⚠️ 올바른 이메일 형식(예: dev@example.com)을 입력해 주세요.';
+      errorStep2.textContent = inputEmail === ''
+        ? '⚠️ 이메일 주소가 비어 있습니다. 매칭 안내를 받을 이메일을 입력해 주세요. (예: dev@example.com)'
+        : '⚠️ 이메일 형식이 올바르지 않습니다. @와 도메인(.com 등)을 포함해 주세요. (예: dev@example.com)';
       errorStep2.classList.add('show');
+      markInvalid([flowName, flowEmail], [flowEmail]);
       flowEmail.focus();
       return;
     }
 
     errorStep2.classList.remove('show');
+    markInvalid([flowName, flowEmail], []);
     flowState.name = inputName;
     flowState.email = inputEmail;
 
@@ -330,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       card.innerHTML = `
         <p class="rec-category">${project.category}</p>
-        <h4>${project.title}</h4>
+        <h3>${project.title}</h3>
         <p class="rec-stack"><strong>기술:</strong> ${project.stack.join(', ')}</p>
         <div class="rec-tags">${positionTags}</div>
         <p class="rec-slots">${project.slots > 0 ? `남은 자리 ${project.slots}명` : '모집 인원 마감'}</p>
@@ -340,6 +391,8 @@ document.addEventListener('DOMContentLoaded', function () {
       button.type = 'button';
       button.className = 'btn ' + (action.disabled ? 'secondary-btn' : 'primary-btn');
       button.textContent = action.label;
+      // 같은 이름의 버튼이 여러 개라 스크린리더에서는 프로젝트명까지 읽도록 함
+      button.setAttribute('aria-label', `‘${project.title}’ ${action.label}`);
       button.disabled = action.disabled;
       button.addEventListener('click', () => openRequestPanel(project));
       card.appendChild(button);
@@ -390,15 +443,18 @@ document.addEventListener('DOMContentLoaded', function () {
         btnYes.type = 'button';
         btnYes.className = 'btn danger-btn';
         btnYes.textContent = '네, 취소합니다';
+        btnYes.setAttribute('aria-label', `네, 취소합니다 (‘${req.title}’ 참여 요청)`);
         btnYes.addEventListener('click', () => cancelRequest(req.projectId));
 
         const btnNo = document.createElement('button');
         btnNo.type = 'button';
         btnNo.className = 'btn secondary-btn';
         btnNo.textContent = '요청 유지';
+        btnNo.setAttribute('aria-label', `요청 유지 (‘${req.title}’)`);
         btnNo.addEventListener('click', () => {
           req.confirming = false;
           renderRequests();
+          focusRequestButton(req.projectId);
         });
 
         actions.append(ask, btnYes, btnNo);
@@ -407,16 +463,27 @@ document.addEventListener('DOMContentLoaded', function () {
         btnCancel.type = 'button';
         btnCancel.className = 'btn secondary-btn';
         btnCancel.textContent = '요청 취소';
+        btnCancel.setAttribute('aria-label', `요청 취소 (‘${req.title}’)`);
         btnCancel.addEventListener('click', () => {
           req.confirming = true;
           renderRequests();
+          focusRequestButton(req.projectId);
         });
         actions.appendChild(btnCancel);
       }
 
+      item.dataset.projectId = req.projectId;
+
       item.append(info, actions);
       requestList.appendChild(item);
     });
+  }
+
+  // 11주차: 목록을 다시 그린 뒤 같은 요청 항목의 첫 버튼으로 초점 복귀
+  function focusRequestButton(projectId) {
+    const item = requestList.querySelector(`[data-project-id="${projectId}"]`);
+    const button = item && item.querySelector('button');
+    if (button) button.focus();
   }
 
   function updateCounter() {
@@ -430,6 +497,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (recommendState.requests.length >= MAX_REQUESTS) {
       showNotice(`⚠️ 참여 요청은 동시에 ${MAX_REQUESTS}개까지 보낼 수 있습니다. 아래 목록에서 기존 요청을 취소한 뒤 다시 시도해 주세요.`, 'error');
       recNotice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      recNotice.focus({ preventScroll: true });
       return;
     }
 
@@ -463,6 +531,7 @@ document.addEventListener('DOMContentLoaded', function () {
     showNotice(`‘${target.title}’ 참여 요청을 취소했습니다. 다른 프로젝트에 다시 요청할 수 있어요.`, 'info');
     renderRequests();
     renderProjects();
+    recNotice.focus();
   }
 
   function unlockRecommend() {
@@ -545,6 +614,7 @@ document.addEventListener('DOMContentLoaded', function () {
   btnCancelRequest.addEventListener('click', function () {
     closeRequestPanel();
     showNotice('요청서 작성을 취소했습니다. 목록에서 다른 프로젝트를 골라 보세요.', 'info');
+    recNotice.focus();
   });
 
   btnSendRequest.addEventListener('click', function () {
@@ -552,18 +622,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const message = requestMessage.value.trim();
 
     if (!hours) {
-      errorRequest.textContent = '⚠️ 주당 참여 가능 시간을 선택해 주세요.';
+      errorRequest.textContent = '⚠️ 주당 참여 가능 시간을 선택하지 않았습니다. 목록에서 참여할 수 있는 시간을 골라 주세요.';
       errorRequest.classList.add('show');
+      requestHours.setAttribute('aria-invalid', 'true');
       requestHours.focus();
       return;
     }
+    requestHours.setAttribute('aria-invalid', 'false');
 
     if (message.length < MIN_MESSAGE) {
       errorRequest.textContent = `⚠️ 자기소개를 ${MIN_MESSAGE}자 이상 적어 주세요. (현재 ${message.length}자, ${MIN_MESSAGE - message.length}자 더 필요) 사용해 본 기술이나 참여하고 싶은 이유를 적으면 좋아요.`;
       errorRequest.classList.add('show');
+      requestMessage.setAttribute('aria-invalid', 'true');
       requestMessage.focus();
       return;
     }
+    requestMessage.setAttribute('aria-invalid', 'false');
 
     const project = projects.find(p => p.id === recommendState.selectedProjectId);
     recommendState.requests.push({
@@ -578,6 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
     renderRequests();
     showNotice(`✅ ‘${project.title}’ 팀에 참여 요청을 보냈습니다. 팀 리더가 수락하면 ${flowState.email} 주소로 알려 드립니다.`, 'success');
     recNotice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    recNotice.focus({ preventScroll: true });
   });
 
 
