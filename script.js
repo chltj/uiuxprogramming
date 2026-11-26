@@ -1,37 +1,167 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabPanes = document.querySelectorAll('.tab-pane');
+  // =========================================================
+  // 12주차: 재사용 UI 컴포넌트 (탭 / 아코디언 / 모달)
+  //  - HTML에 정해진 클래스·data 속성만 붙이면 같은 함수로 동작
+  // =========================================================
 
-  // 11주차: 선택 상태를 aria-selected로도 알리고, 선택된 탭만 Tab 키로 들어오게 함
-  function selectTab(button) {
-    tabButtons.forEach(btn => {
-      const selected = btn === button;
-      btn.classList.toggle('active', selected);
-      btn.setAttribute('aria-selected', String(selected));
-      btn.tabIndex = selected ? 0 : -1;
-    });
+  // 방향키 이동 공통 처리: 목록에서 다음 위치 계산 (탭·아코디언이 함께 사용)
+  function getRovingIndex(key, index, length) {
+    const map = { ArrowRight: index + 1, ArrowDown: index + 1, ArrowLeft: index - 1, ArrowUp: index - 1, Home: 0, End: length - 1 };
+    if (!(key in map)) return -1;
+    return (map[key] + length) % length;
+  }
 
-    const targetTabId = button.getAttribute('data-tab');
-    tabPanes.forEach(pane => {
-      pane.classList.toggle('active', pane.id === targetTabId);
+  // ----- 컴포넌트 1: 탭 -----
+  // [role=tablist][data-tabs] 안의 [role=tab] 버튼과 aria-controls로 연결된 패널을 묶어 동작
+  function initTabs(tablist) {
+    const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+    const panels = tabs.map(tab => document.getElementById(tab.getAttribute('aria-controls')));
+
+    function select(tab) {
+      tabs.forEach((t, i) => {
+        const selected = t === tab;
+        t.classList.toggle('active', selected);            // 스타일로 현재 탭 표시
+        t.setAttribute('aria-selected', String(selected)); // 스크린리더에 선택 상태 전달
+        t.tabIndex = selected ? 0 : -1;                    // 선택된 탭만 Tab 순서에 포함
+        panels[i].classList.toggle('active', selected);
+      });
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => select(tab));
+      // ← → Home End 키로 탭 이동 (↑ ↓는 페이지 스크롤에 남겨 둠)
+      tab.addEventListener('keydown', event => {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') return;
+        const next = getRovingIndex(event.key, index, tabs.length);
+        if (next < 0) return;
+        event.preventDefault();
+        select(tabs[next]);
+        tabs[next].focus();
+      });
     });
   }
 
-  tabButtons.forEach(function (button, index) {
-    button.addEventListener('click', function () {
-      selectTab(button);
-    });
+  // ----- 컴포넌트 2: 아코디언 -----
+  // [data-accordion] 안의 .accordion-trigger 버튼이 aria-controls로 연결된 패널을 열고 닫음
+  // data-accordion="single"이면 하나를 열 때 나머지는 자동으로 닫힘
+  function setAccordionItem(trigger, open) {
+    const panel = document.getElementById(trigger.getAttribute('aria-controls'));
+    trigger.setAttribute('aria-expanded', String(open));
+    trigger.closest('.accordion-item').classList.toggle('is-open', open);
+    panel.hidden = !open;
+    const state = trigger.querySelector('.accordion-state');
+    if (state) state.textContent = open ? '접기' : '펼치기';  // 색이 아닌 문구로도 상태 표시
+  }
 
-    // ← → Home End 키로 탭 이동
-    button.addEventListener('keydown', function (event) {
-      const keys = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabButtons.length - 1 };
-      if (!(event.key in keys)) return;
-      event.preventDefault();
-      const next = tabButtons[(keys[event.key] + tabButtons.length) % tabButtons.length];
-      selectTab(next);
-      next.focus();
+  function initAccordion(root) {
+    const triggers = Array.from(root.querySelectorAll('.accordion-trigger'));
+    const single = root.dataset.accordion === 'single';
+
+    triggers.forEach((trigger, index) => {
+      trigger.addEventListener('click', () => {
+        const willOpen = trigger.getAttribute('aria-expanded') !== 'true';
+        if (single && willOpen) triggers.forEach(t => { if (t !== trigger) setAccordionItem(t, false); });
+        setAccordionItem(trigger, willOpen);
+      });
+      // ↑ ↓ Home End 키로 질문 사이 이동 (Enter·Space는 버튼 기본 동작으로 열고 닫음)
+      trigger.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') return;
+        const next = getRovingIndex(event.key, index, triggers.length);
+        if (next < 0) return;
+        event.preventDefault();
+        triggers[next].focus();
+      });
     });
+  }
+
+  // ----- 컴포넌트 3: 모달 -----
+  // .modal 구조 하나로 여러 창을 사용. 열면 배경 비활성(inert) + 창 안에 초점 가두기,
+  // Esc·닫기 버튼·배경 클릭으로 닫고, 닫으면 창을 연 버튼으로 초점을 되돌림
+  const modalState = { current: null, trigger: null };
+  const pageRegions = document.querySelectorAll('body > header, body > main, body > footer, body > .skip-link');
+  const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  function getFocusable(modal) {
+    return Array.from(modal.querySelectorAll(FOCUSABLE)).filter(el => el.getClientRects().length);
+  }
+
+  function openModal(modal, trigger) {
+    if (modalState.current) closeModal(null);
+    modalState.current = modal;
+    modalState.trigger = trigger || document.activeElement;
+    modal.hidden = false;
+    document.body.classList.add('modal-open');
+    pageRegions.forEach(region => { region.inert = true; });
+    if (trigger && trigger.hasAttribute('aria-expanded')) trigger.setAttribute('aria-expanded', 'true');
+    // 위험한 동작이 있는 창은 [data-modal-initial](취소)에, 나머지는 첫 번째 버튼에 초점
+    const first = modal.querySelector('[data-modal-initial]') || getFocusable(modal)[0];
+    if (first) first.focus();
+  }
+
+  // returnFocus: 닫은 뒤 초점을 보낼 곳 (생략하면 창을 연 버튼, null이면 이동 안 함)
+  function closeModal(returnFocus) {
+    const modal = modalState.current;
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    pageRegions.forEach(region => { region.inert = false; });
+    const trigger = modalState.trigger;
+    if (trigger && trigger.hasAttribute('aria-expanded')) trigger.setAttribute('aria-expanded', 'false');
+    modalState.current = null;
+    modalState.trigger = null;
+    const target = returnFocus === undefined ? trigger : returnFocus;
+    if (target && document.contains(target)) target.focus();
+  }
+
+  // 공통 이벤트 처리: data-modal-close가 붙은 요소(✕, 닫기, 배경)는 모두 같은 방식으로 닫음
+  document.addEventListener('click', event => {
+    if (modalState.current && event.target.closest('[data-modal-close]')) closeModal();
   });
+
+  document.addEventListener('keydown', event => {
+    const modal = modalState.current;
+    if (!modal) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeModal();
+    } else if (event.key === 'Tab') {
+      // 초점 가두기: 마지막 요소에서 Tab → 첫 요소, 첫 요소에서 Shift+Tab → 마지막 요소
+      const items = getFocusable(modal);
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (!modal.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  // 요약 표(라벨-값 행) 그리기: 등록 결과 화면과 공고 상세 모달에서 함께 사용
+  function renderSummaryRows(container, info) {
+    container.innerHTML = '';
+    Object.keys(info).forEach(label => {
+      const row = document.createElement('div');
+      row.className = 'summary-row';
+      const key = document.createElement('span');
+      key.className = 'summary-label';
+      key.textContent = label;
+      const val = document.createElement('span');
+      val.className = 'summary-value';
+      val.textContent = info[label];
+      row.append(key, val);
+      container.appendChild(row);
+    });
+  }
+
+  // 페이지 안의 모든 탭·아코디언을 같은 함수로 초기화
+  document.querySelectorAll('[data-tabs]').forEach(initTabs);
+  document.querySelectorAll('[data-accordion]').forEach(initAccordion);
 
 
   // 1. 상태(State) 데이터 모델
@@ -955,7 +1085,21 @@ document.addEventListener('DOMContentLoaded', function () {
       meta.textContent = `${info['분야']} · ${info['모집 포지션']} · ${info['진행 방식']} · 마감 ${info['마감일']}`;
 
       box.append(title, meta);
-      item.appendChild(box);
+
+      // 12주차: 공고 상세 보기 모달 열기 버튼 (버튼 이름에 공고명 포함)
+      const actions = document.createElement('div');
+      actions.className = 'request-actions';
+      const detailBtn = document.createElement('button');
+      detailBtn.type = 'button';
+      detailBtn.className = 'btn secondary-btn small-btn';
+      detailBtn.textContent = '상세 보기';
+      detailBtn.setAttribute('aria-label', `‘${post.title}’ 상세 보기`);
+      detailBtn.setAttribute('aria-haspopup', 'dialog');
+      detailBtn.setAttribute('aria-expanded', 'false');
+      detailBtn.addEventListener('click', () => openRecruitDetail(post, detailBtn));
+      actions.appendChild(detailBtn);
+
+      item.append(box, actions);
       recruitList.appendChild(item);
     });
   }
@@ -1063,19 +1207,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // 5) 성공: 완료 안내 + 등록 내용 요약
       const info = describeRecruit(post);
-      recruitResultTable.innerHTML = '';
-      Object.keys(info).forEach(label => {
-        const row = document.createElement('div');
-        row.className = 'summary-row';
-        const key = document.createElement('span');
-        key.className = 'summary-label';
-        key.textContent = label;
-        const val = document.createElement('span');
-        val.className = 'summary-value';
-        val.textContent = info[label];
-        row.append(key, val);
-        recruitResultTable.appendChild(row);
-      });
+      renderSummaryRows(recruitResultTable, info);
 
       recruitForm.classList.add('hidden');
       recruitResult.classList.remove('hidden');
@@ -1097,11 +1229,37 @@ document.addEventListener('DOMContentLoaded', function () {
     recruitFields.title.input.focus();
   });
 
+  // 12주차: 모달 1 - 공고 상세 보기
+  const modalRecruit = document.getElementById('modal-recruit');
+  const modalClear = document.getElementById('modal-clear');
+
+  function openRecruitDetail(post, trigger) {
+    const info = describeRecruit(post);
+    document.getElementById('modal-recruit-title').textContent = post.title;
+    document.getElementById('modal-recruit-mode').textContent = `${post.mode} 진행 · 마감 ${info['마감일']}`;
+    delete info['프로젝트명'];
+    renderSummaryRows(document.getElementById('modal-recruit-table'), info);
+    document.getElementById('modal-recruit-intro').textContent = post.intro || '등록된 소개가 없습니다.';
+    const apply = document.getElementById('modal-recruit-apply');
+    apply.href = `mailto:${post.email}?subject=${encodeURIComponent(`[DevBridge] ‘${post.title}’ 참여 지원`)}`;
+    apply.setAttribute('aria-label', `‘${post.title}’ 팀 리더에게 이메일로 지원하기`);
+    openModal(modalRecruit, trigger);
+  }
+
+  // 12주차: 모달 2 - 모두 삭제 전 확인 (누르자마자 삭제되던 동작을 확인 창으로 개선)
   btnRecruitClear.addEventListener('click', function () {
+    document.getElementById('modal-clear-count').textContent = `${loadRecruits().length}개`;
+    openModal(modalClear, btnRecruitClear);
+  });
+
+  document.getElementById('btn-clear-confirm').addEventListener('click', function () {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (e) { /* 저장소 접근 불가 시 무시 */ }
     renderRecruitList();
+    recruitResultCount.textContent = '저장된 모집 공고를 모두 삭제했습니다. 등록된 공고 0개';
+    // 삭제 버튼이 사라지므로 목록 제목으로 초점 이동
+    closeModal(document.getElementById('recruit-list-title'));
   });
 
   filterButtons.forEach(btn => {
